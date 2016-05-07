@@ -1,0 +1,42 @@
+namespace ca.mcgilleus.budgetbuilder.model;
+
+class EUSBudget {
+  import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+  private XSSFWorkbook budget;
+  Date year;
+  1 -- * Portfolio;
+  1  -> 0..1 EUSBudget previousYear;
+}
+
+class Portfolio {
+  String name;
+  1 -- * CommitteeBudget;
+}
+
+class CommitteeBudget {
+  String name;
+}//$?[End_of_model]$?
+
+class EUSBudget
+{
+  position 124 27 109 58;
+}
+
+class EUSBudget
+{
+  position 124 27 109 58;
+  position.association EUSBudget__Portfolio 85,58 91,0;
+  position.association EUSBudget__EUSBudget:previousYear 15,58 0,30;
+}
+
+class Portfolio
+{
+  position 118 194 109 45;
+  position.association Budget__Portfolio 61,58 50,0;
+  position.association CommitteeBudget__Portfolio 90,58 88,0;
+}
+
+class CommitteeBudget
+{
+  position 121 311 127 58;
+}
