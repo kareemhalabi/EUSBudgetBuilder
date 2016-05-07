@@ -53,7 +53,7 @@ public class EUSBudget
     return year;
   }
 
-  public XSSFWorkbook getBudget() {
+  public XSSFWorkbook getWorkbook() {
 	return budget;
 }
 
