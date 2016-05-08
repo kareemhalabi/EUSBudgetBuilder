@@ -134,7 +134,7 @@ public class PortfolioCreator {
 	public static void createPortfolio(File f, EUSBudget budget) {
 		Portfolio p = new Portfolio(f.getName(), budget);
 
-System.out.println("Created portfolio: " + p.getName());
+System.out.println("Compiling portfolio: " + p.getName());
 
 		budget.getWorkbook().createSheet(p.getName());
 		File[] portfolioFiles = f.listFiles();
@@ -175,11 +175,7 @@ System.out.println("Created portfolio: " + p.getName());
 		
 		title = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
 		
-		Calendar c = Calendar.getInstance();
-		c.setTime(p.getEUSBudget().getYear());
-		String budgetYear = c.get(Calendar.YEAR) + "-" + (c.get(Calendar.YEAR) +1);
-		
-		title.setCellValue("Super Duper Long Title Budget " + budgetYear);
+		title.setCellValue(p.getEUSBudget().getBudgetYear() + " Budget");
 		
 		for(int i = 0; i < p.getCommitteeBudgets().size(); i++) {
 			CommitteeBudget committee = p.getCommitteeBudget(i);

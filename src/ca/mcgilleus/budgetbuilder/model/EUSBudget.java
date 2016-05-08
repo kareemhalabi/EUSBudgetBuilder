@@ -2,7 +2,6 @@
 /*This code was generated using the UMPLE 1.22.0.5146 modeling language!*/
 
 package ca.mcgilleus.budgetbuilder.model;
-import java.util.Date;
 import java.util.*;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -51,6 +50,13 @@ public class EUSBudget
   public Date getYear()
   {
     return year;
+  }
+  
+  public String getBudgetYear() {
+		Calendar c = Calendar.getInstance();
+		c.setTime(this.year);
+		
+		return c.get(Calendar.YEAR) + "-" + (c.get(Calendar.YEAR) +1);
   }
 
   public XSSFWorkbook getWorkbook() {
