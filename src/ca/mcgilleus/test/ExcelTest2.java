@@ -14,7 +14,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import ca.mcgilleus.budgetbuilder.util.Util;
+import ca.mcgilleus.budgetbuilder.util.Cloner;
 
 /**
  * Kareem Halabi
@@ -30,7 +30,7 @@ public class ExcelTest2 {
 //			CellReference cr = new CellReference("B37");
 			XSSFSheet sheet = wb.getSheet("Template");
 			XSSFSheet duplicate = wb.createSheet();
-			Util.cloneSheet(sheet, duplicate);
+			Cloner.cloneSheet(sheet, duplicate);
 			Name n = wb.getName("AMT");
 			System.out.println(n.getRefersToFormula());
 			Name m = wb.getNameAt(1);

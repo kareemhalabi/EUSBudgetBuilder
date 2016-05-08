@@ -21,8 +21,7 @@ import ca.mcgilleus.budgetbuilder.model.EUSBudget;
 import ca.mcgilleus.budgetbuilder.model.Portfolio;
 
 /**
- * Kareem Halabi
- * 260 616 162
+ * @author Kareem Halabi
  */
 
 public class EUSBudgetBuilder {

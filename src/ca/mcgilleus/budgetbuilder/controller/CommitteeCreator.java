@@ -15,7 +15,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import ca.mcgilleus.budgetbuilder.model.CommitteeBudget;
 import ca.mcgilleus.budgetbuilder.model.Portfolio;
-import ca.mcgilleus.budgetbuilder.util.Util;
+import ca.mcgilleus.budgetbuilder.util.Cloner;
 
 public class CommitteeCreator {
 
@@ -46,7 +46,7 @@ public class CommitteeCreator {
 		CommitteeBudget committeeBudget = new CommitteeBudget(sheetName, amt.getRefersToFormula(), p);
 
 		XSSFSheet bSheet = EUSBudgetBuilder.getWorkbook().createSheet(sheetName);
-		Util.cloneSheet(pSheet, bSheet);
+		Cloner.cloneSheet(pSheet, bSheet);
 
 		bSheet.setTabColor(color.getIndex());
 		System.out.println("\t Created committee: " + sheetName);
