@@ -4,6 +4,8 @@
 package ca.mcgilleus.budgetbuilder.model;
 import java.util.*;
 
+import org.apache.poi.ss.usermodel.CellStyle;
+
 // line 9 "../../../../Model.ump"
 // line 30 "../../../../Model.ump"
 public class Portfolio
@@ -15,6 +17,7 @@ public class Portfolio
 
   //Portfolio Attributes
   private String name;
+  private CellStyle portfolioLabelStyle;
 
   //Portfolio Associations
   private List<CommitteeBudget> committeeBudgets;
@@ -199,4 +202,12 @@ public class Portfolio
             "  " + "eUSBudget = "+(getEUSBudget()!=null?Integer.toHexString(System.identityHashCode(getEUSBudget())):"null")
      + outputString;
   }
+
+public CellStyle getPortfolioLabelStyle() {
+	return portfolioLabelStyle;
+}
+
+public void setPortfolioLabelStyle(CellStyle portfolioLabelStyle) {
+	this.portfolioLabelStyle = portfolioLabelStyle;
+}
 }

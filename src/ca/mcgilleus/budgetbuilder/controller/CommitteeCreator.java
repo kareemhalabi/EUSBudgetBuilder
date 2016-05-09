@@ -49,7 +49,7 @@ public class CommitteeCreator {
 		Cloner.cloneSheet(pSheet, bSheet);
 
 		bSheet.setTabColor(color.getIndex());
-		System.out.println("\t Created committee: " + sheetName);
+		System.out.println("\t -" + sheetName);
 	}
 
 }

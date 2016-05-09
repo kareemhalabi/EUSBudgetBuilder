@@ -11,6 +11,8 @@ import java.util.Queue;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.util.CellAddress;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -19,6 +21,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import ca.mcgilleus.budgetbuilder.model.CommitteeBudget;
 import ca.mcgilleus.budgetbuilder.model.EUSBudget;
 import ca.mcgilleus.budgetbuilder.model.Portfolio;
+import ca.mcgilleus.budgetbuilder.util.Styles;
 
 /**
  * @author Kareem Halabi
@@ -90,6 +93,7 @@ System.out.println("Compiling EUS Budget Overview");
 				
 				XSSFCell portfolio = row.createCell(0, Cell.CELL_TYPE_STRING);
 				portfolio.setCellValue(p.getName());
+				portfolio.setCellStyle(p.getPortfolioLabelStyle());
 				
 				XSSFCell committeeName = row.createCell(row.getLastCellNum(), Cell.CELL_TYPE_STRING);
 				committeeName.setCellValue(committee.getName());
@@ -98,6 +102,43 @@ System.out.println("Compiling EUS Budget Overview");
 				committeeAmt.setCellFormula(committee.getAmtRequestedRef());	
 			}
 		}
+		
+		writeTotals(overviewSheet);
+		
+		styleBudgetOverview(overviewSheet);
+	}
+
+	private static void styleBudgetOverview(XSSFSheet overviewSheet) {
+
+		XSSFRow header = overviewSheet.getRow(0);
+		
+		//Fix Column Widths
+		for(int i = 0; i < header.getLastCellNum(); i++) {
+			overviewSheet.autoSizeColumn(i);
+			int adjustedWidth = overviewSheet.getColumnWidth(i) + 256*3;
+			
+			if(adjustedWidth > 5000)
+				adjustedWidth = 5000;
+			
+			overviewSheet.setColumnWidth(i, adjustedWidth);
+		}
+		
+		//Apply Header styles
+		for(Cell cell : header) {
+			cell.setCellStyle(Styles.HEADER_STYLE);
+		}
+		
+		for(int j = 1; j < overviewSheet.getLastRowNum()-1; j++) {
+			XSSFRow dataRow = overviewSheet.getRow(j);
+			
+			//Portfolio label styling is done separately in createEUSBudgetOverview
+			
+			dataRow.getCell(1).setCellStyle(Styles.COMMITTEE_LABEL_STYLE);
+
+			for (int k = 2; k < dataRow.getLastCellNum(); k++)
+				dataRow.getCell(k).setCellStyle(Styles.CURRENCY_CELL_STYLE);
+		}
+		
 	}
 
 	public static void createColorQueue(Queue<IndexedColors> colors) {
@@ -111,6 +152,27 @@ System.out.println("Compiling EUS Budget Overview");
 		
 	}
 
+	public static void writeTotals(XSSFSheet overviewSheet) {
+		XSSFRow totals = overviewSheet.createRow(overviewSheet.getLastRowNum()+2);
+		XSSFCell totalLabel = totals.createCell(1, Cell.CELL_TYPE_STRING);
+		totalLabel.setCellValue("Totals");
+		
+		for(int j = totals.getFirstCellNum() + 1;
+				j < overviewSheet.getRow(0).getLastCellNum(); j++) {
+			XSSFCell colTotal = totals.createCell(j, Cell.CELL_TYPE_FORMULA);
+			CellAddress ref = colTotal.getAddress();
+			String sumFormula = "SUM(" + CellReference.convertNumToColString(ref.getColumn()) + "2:" +
+					CellReference.convertNumToColString(ref.getColumn()) + (ref.getRow()-1) + ")";
+			colTotal.setCellFormula(sumFormula);
+		}
+		
+		//Styling
+
+		totalLabel.setCellStyle(Styles.TOTAL_LABEL_STYLE);
+		
+		for(int l = 2; l < totals.getLastCellNum(); l++) 
+			totals.getCell(l).setCellStyle(Styles.TOTAL_CELL_STYLE);
+	}
 
 	public static EUSBudget createBudget() {
 		Calendar c = Calendar.getInstance();

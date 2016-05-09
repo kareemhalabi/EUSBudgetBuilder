@@ -33,6 +33,7 @@ public class PortfolioCreator {
 	private static Queue<IndexedColors> allColors;
 	private static Queue<IndexedColors> availableTabColors;
 	private static IndexedColors currentColor;
+	private static Portfolio p;
 	
 	public static Queue<IndexedColors> getAllColors() {
 		return allColors;
@@ -53,7 +54,7 @@ public class PortfolioCreator {
 	 * @param budget Budget to add portfolio to  
 	 */
 	public static void createPortfolio(File f, EUSBudget budget) {
-		Portfolio p = new Portfolio(f.getName(), budget);
+		p = new Portfolio(f.getName(), budget);
 
 System.out.println("Compiling portfolio: " + p.getName());
 
@@ -112,19 +113,7 @@ System.out.println("Compiling portfolio: " + p.getName());
 			committeeAmt.setCellFormula(committee.getAmtRequestedRef());
 		}
 		
-		//-- Write totals --//
-		XSSFRow totals = overviewSheet.createRow(overviewSheet.getLastRowNum()+2);
-		XSSFCell totalLabel = totals.createCell(1, Cell.CELL_TYPE_STRING);
-		totalLabel.setCellValue("Totals");
-		
-		for(int j = totals.getFirstCellNum() + 1;
-				j < overviewSheet.getRow(0).getLastCellNum(); j++) {
-			XSSFCell colTotal = totals.createCell(j, Cell.CELL_TYPE_FORMULA);
-			CellAddress ref = colTotal.getAddress();
-			String sumFormula = "SUM(" + CellReference.convertNumToColString(ref.getColumn()) + "2:" +
-					CellReference.convertNumToColString(ref.getColumn()) + (ref.getRow()-1) + ")";
-			colTotal.setCellFormula(sumFormula);
-		}
+		EUSBudgetBuilder.writeTotals(overviewSheet);
 		
 		stylePortfolioOverview(overviewSheet);
 		
@@ -152,19 +141,22 @@ System.out.println("\t Overview done!");
 		}
 		
 		//Apply Data styles
+		
+		CellStyle customPortfolioStyle = EUSBudgetBuilder.getWorkbook().createCellStyle();
+		customPortfolioStyle.cloneStyleFrom(Styles.PORTFOLIO_LABEL_STYLE);
+		XSSFFont customPortfolioFont = EUSBudgetBuilder.getWorkbook().createFont();
+		customPortfolioFont.setFontHeightInPoints((short)10);
+		customPortfolioFont.setFontName("Arial");
+		customPortfolioFont.setColor(currentColor.getIndex());
+		customPortfolioFont.setBold(false);
+		customPortfolioFont.setItalic(false);
+		
+		customPortfolioStyle.setFont(customPortfolioFont);
+		
+		p.setPortfolioLabelStyle(customPortfolioStyle);
+		
 		for(int j = 1; j < overviewSheet.getLastRowNum()-1; j++) {
 			XSSFRow dataRow = overviewSheet.getRow(j);
-			
-			CellStyle customPortfolioStyle = EUSBudgetBuilder.getWorkbook().createCellStyle();
-			customPortfolioStyle.cloneStyleFrom(Styles.PORTFOLIO_LABEL_STYLE);
-			XSSFFont customPortfolioFont = EUSBudgetBuilder.getWorkbook().createFont();
-			customPortfolioFont.setFontHeightInPoints((short)10);
-			customPortfolioFont.setFontName("Arial");
-			customPortfolioFont.setColor(currentColor.getIndex());
-			customPortfolioFont.setBold(false);
-			customPortfolioFont.setItalic(false);
-			
-			customPortfolioStyle.setFont(customPortfolioFont);
 			
 			dataRow.getCell(0).setCellStyle(customPortfolioStyle);
 			
@@ -174,12 +166,6 @@ System.out.println("\t Overview done!");
 				dataRow.getCell(k).setCellStyle(Styles.CURRENCY_CELL_STYLE);
 		}
 		
-		//Apply Total styles
-		XSSFRow totals= overviewSheet.getRow(overviewSheet.getLastRowNum());
-		XSSFCell totalLabel = totals.getCell(1);
-		totalLabel.setCellStyle(Styles.TOTAL_LABEL_STYLE);
-		
-		for(int l = 2; l < totals.getLastCellNum(); l++) 
-			totals.getCell(l).setCellStyle(Styles.TOTAL_CELL_STYLE);
+		//Total styles done in EUSBudgetBuilder.writeTotals()
 	}
 }
