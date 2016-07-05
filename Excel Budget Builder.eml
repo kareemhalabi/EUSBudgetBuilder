@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component inheritJdk="true">
+	<exclude-output/>
+	<contentEntry url="file://$MODULE_DIR$"/>
+	<lib name="commons-codec-1.10.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/poi-3.14/lib/commons-codec-1.10.jar!/"/>
+	</lib>
+	<lib name="commons-logging-1.2.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/poi-3.14/lib/commons-logging-1.2.jar!/"/>
+	</lib>
+	<lib name="junit-4.12.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/poi-3.14/lib/junit-4.12.jar!/"/>
+	</lib>
+	<lib name="log4j-1.2.17.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/poi-3.14/lib/log4j-1.2.17.jar!/"/>
+	</lib>
+	<lib name="curvesapi-1.03.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/poi-3.14/ooxml-lib/curvesapi-1.03.jar!/"/>
+	</lib>
+	<lib name="xmlbeans-2.6.0.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/poi-3.14/ooxml-lib/xmlbeans-2.6.0.jar!/"/>
+	</lib>
+	<lib name="poi-3.14-20160307.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/poi-3.14/poi-3.14-20160307.jar!/"/>
+	</lib>
+	<lib name="poi-examples-3.14-20160307.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/poi-3.14/poi-examples-3.14-20160307.jar!/"/>
+	</lib>
+	<lib name="poi-excelant-3.14-20160307.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/poi-3.14/poi-excelant-3.14-20160307.jar!/"/>
+	</lib>
+	<lib name="poi-ooxml-3.14-20160307.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/poi-3.14/poi-ooxml-3.14-20160307.jar!/"/>
+	</lib>
+	<lib name="poi-ooxml-schemas-3.14-20160307.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/poi-3.14/poi-ooxml-schemas-3.14-20160307.jar!/"/>
+	</lib>
+	<lib name="poi-scratchpad-3.14-20160307.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/poi-3.14/poi-scratchpad-3.14-20160307.jar!/"/>
+	</lib>
+</component>
