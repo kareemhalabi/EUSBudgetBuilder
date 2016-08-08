@@ -19,12 +19,10 @@ public class BudgetWizzard extends Application {
 	@Override
 	public void start(Stage stage) throws IOException {
 		primaryStage = stage;
-		WelcomeController welcomeController = new WelcomeController();
-
 		primaryStage.setTitle("EUS Budget Builder");
 		primaryStage.setResizable(false);
 		primaryStage.getIcons().add(new Image("ca/mcgilleus/budgetbuilder/EUSfavicon.png"));
-		primaryStage.setScene(new Scene(welcomeController));
+		primaryStage.setScene(WelcomeController.getWelcomeScene());
 		primaryStage.show();
 	}
 }
