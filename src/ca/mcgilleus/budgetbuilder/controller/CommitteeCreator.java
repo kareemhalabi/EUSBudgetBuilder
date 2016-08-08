@@ -1,3 +1,8 @@
+/**
+ * © Kareem Halabi 2016
+ * @author Kareem Halabi
+ */
+
 package ca.mcgilleus.budgetbuilder.controller;
 
 import java.io.File;
@@ -31,6 +36,7 @@ public class CommitteeCreator {
 		XSSFCell nameCell = nameRow.getCell(nameRef.getCol());
 		String sheetName = nameCell.getStringCellValue();
 
+		//TODO throw error instead
 		// Get full name if abbreviated unavailable
 		if (sheetName == null || sheetName.trim().length() == 0) {
 			nameRow = pSheet.getRow(nameRef.getRow() - 1);
@@ -45,10 +51,12 @@ public class CommitteeCreator {
 
 		CommitteeBudget committeeBudget = new CommitteeBudget(sheetName, amt.getRefersToFormula(), p);
 
-		XSSFSheet bSheet = EUSBudgetBuilder.getWorkbook().createSheet(sheetName);
+		XSSFSheet bSheet = BudgetBuilder.getWorkbook().createSheet(sheetName);
 		Cloner.cloneSheet(pSheet, bSheet);
 
 		bSheet.setTabColor(color.getIndex());
+
+		//TODO change to log output
 		System.out.println("\t -" + sheetName);
 	}
 

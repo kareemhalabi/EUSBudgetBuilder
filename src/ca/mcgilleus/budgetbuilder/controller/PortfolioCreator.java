@@ -1,3 +1,8 @@
+/**
+ * © Kareem Halabi 2016
+ * @author Kareem Halabi
+ */
+
 package ca.mcgilleus.budgetbuilder.controller;
 
 import java.io.File;
@@ -10,8 +15,6 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.util.CellAddress;
-import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -22,11 +25,6 @@ import ca.mcgilleus.budgetbuilder.model.CommitteeBudget;
 import ca.mcgilleus.budgetbuilder.model.EUSBudget;
 import ca.mcgilleus.budgetbuilder.model.Portfolio;
 import ca.mcgilleus.budgetbuilder.util.Styles;
-
-/**
- * Kareem Halabi
- * 260 616 162
- */
 
 public class PortfolioCreator {
 	
@@ -113,7 +111,7 @@ System.out.println("Compiling portfolio: " + p.getName());
 			committeeAmt.setCellFormula(committee.getAmtRequestedRef());
 		}
 		
-		EUSBudgetBuilder.writeTotals(overviewSheet);
+		BudgetBuilder.writeTotals(overviewSheet);
 		
 		stylePortfolioOverview(overviewSheet);
 		
@@ -142,9 +140,9 @@ System.out.println("\t Overview done!");
 		
 		//Apply Data styles
 		
-		CellStyle customPortfolioStyle = EUSBudgetBuilder.getWorkbook().createCellStyle();
+		CellStyle customPortfolioStyle = BudgetBuilder.getWorkbook().createCellStyle();
 		customPortfolioStyle.cloneStyleFrom(Styles.PORTFOLIO_LABEL_STYLE);
-		XSSFFont customPortfolioFont = EUSBudgetBuilder.getWorkbook().createFont();
+		XSSFFont customPortfolioFont = BudgetBuilder.getWorkbook().createFont();
 		customPortfolioFont.setFontHeightInPoints((short)10);
 		customPortfolioFont.setFontName("Arial");
 		customPortfolioFont.setColor(currentColor.getIndex());
@@ -166,6 +164,6 @@ System.out.println("\t Overview done!");
 				dataRow.getCell(k).setCellStyle(Styles.CURRENCY_CELL_STYLE);
 		}
 		
-		//Total styles done in EUSBudgetBuilder.writeTotals()
+		//Total styles done in BudgetBuilder.writeTotals()
 	}
 }
