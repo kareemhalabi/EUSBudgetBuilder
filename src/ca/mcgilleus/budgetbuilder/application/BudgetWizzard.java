@@ -1,0 +1,30 @@
+package ca.mcgilleus.budgetbuilder.application;
+/*
+ * Created by Kareem Halabi on 2016-08-07.
+ */
+
+import ca.mcgilleus.budgetbuilder.fxml.WelcomeController;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.stage.Stage;
+import java.io.IOException;
+
+public class BudgetWizzard extends Application {
+
+	public static Stage primaryStage;
+
+	public static void main(String[] args) { launch(args);	}
+
+	@Override
+	public void start(Stage stage) throws IOException {
+		primaryStage = stage;
+		WelcomeController welcomeController = new WelcomeController();
+
+		primaryStage.setTitle("EUS Budget Builder");
+		primaryStage.setResizable(false);
+		primaryStage.getIcons().add(new Image("ca/mcgilleus/budgetbuilder/EUSfavicon.png"));
+		primaryStage.setScene(new Scene(welcomeController));
+		primaryStage.show();
+	}
+}
