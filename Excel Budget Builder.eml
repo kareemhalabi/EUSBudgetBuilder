@@ -38,4 +38,7 @@
 	<lib name="poi-scratchpad-3.14-20160307.jar" scope="COMPILE">
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/poi-3.14/poi-scratchpad-3.14-20160307.jar!/"/>
 	</lib>
+	<levels>
+		<level name="poi-3" value="project"/>
+	</levels>
 </component>

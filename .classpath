@@ -22,5 +22,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="poi-3.14/poi-ooxml-schemas-3.14-20160307.jar"/>
 	<classpathentry kind="lib" path="poi-3.14/poi-scratchpad-3.14-20160307.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/poi-3"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

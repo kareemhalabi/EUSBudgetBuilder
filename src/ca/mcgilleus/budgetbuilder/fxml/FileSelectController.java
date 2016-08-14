@@ -57,23 +57,8 @@ public class FileSelectController extends AnchorPane{
 		} catch (IOException exception) {
 			throw new RuntimeException(exception);
 		}
-	}
 
-	public void checkNext() {
-		if(selectedDirectory == null || outputFile == null)
-			fileSelectNextBtn.setDisable(true);
-		else {
-			fileSelectNextBtn.setDisable(false);
-		}
 	}
-
-//	public void initialize() {
-//		if(selectedDirectory == null || outputFile == null)
-//			fileSelectNextBtn.setDisable(true);
-//		else {
-//			fileSelectNextBtn.setDisable(false);
-//		}
-//	}
 
 	public void showDirectoryChooser() {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -96,8 +81,16 @@ public class FileSelectController extends AnchorPane{
 		}
 	}
 
-	public void showValidateScene() {
+	public void checkNext() {
+		if(selectedDirectory == null || outputFile == null)
+			fileSelectNextBtn.setDisable(true);
+		else {
+			fileSelectNextBtn.setDisable(false);
+		}
+	}
 
+	public void showValidateScene() {
+		primaryStage.setScene(new Scene(new ValidationController(selectedDirectory, outputFile)));
 	}
 
 	public void showWelcomeScene() {
