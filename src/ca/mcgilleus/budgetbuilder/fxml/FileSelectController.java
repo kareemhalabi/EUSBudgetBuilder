@@ -1,6 +1,5 @@
 package ca.mcgilleus.budgetbuilder.fxml;
 
-import ca.mcgilleus.budgetbuilder.application.BudgetWizzard;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -21,7 +20,6 @@ import static ca.mcgilleus.budgetbuilder.application.BudgetWizzard.primaryStage;
 public class FileSelectController extends AnchorPane{
 
 	private static Scene fileSelectScene;
-	private static FileSelectController theInstance;
 
 	@FXML
 	public TextField folderTextField;
@@ -30,21 +28,20 @@ public class FileSelectController extends AnchorPane{
 	@FXML
 	public Button fileSelectNextBtn;
 
-	private File outputFile;
-	private File selectedDirectory;
-
-	public static Scene getFileSelectScene() {
-		if (fileSelectScene == null)
-			fileSelectScene = new Scene(getInstance());
-
-		getInstance().checkNext();
-		return fileSelectScene;
+	private static File outputFile;
+	static File getOutputFile() {
+		return outputFile;
 	}
 
-	public static FileSelectController getInstance() {
-		if(theInstance == null)
-			theInstance = new FileSelectController();
-		return theInstance;
+	private static File selectedDirectory;
+	static File getSelectedDirectory() {
+		return selectedDirectory;
+	}
+
+	static Scene getFileSelectScene() {
+		if (fileSelectScene == null)
+			fileSelectScene = new Scene(new FileSelectController());
+		return fileSelectScene;
 	}
 
 	private FileSelectController() {
@@ -81,7 +78,7 @@ public class FileSelectController extends AnchorPane{
 		}
 	}
 
-	public void checkNext() {
+	private void checkNext() {
 		if(selectedDirectory == null || outputFile == null)
 			fileSelectNextBtn.setDisable(true);
 		else {
@@ -90,7 +87,7 @@ public class FileSelectController extends AnchorPane{
 	}
 
 	public void showValidateScene() {
-		primaryStage.setScene(new Scene(new ValidationController(selectedDirectory, outputFile)));
+		primaryStage.setScene(new Scene(new ValidationController()));
 	}
 
 	public void showWelcomeScene() {

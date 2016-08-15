@@ -14,7 +14,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,17 +30,14 @@ public class ValidationController extends AnchorPane{
 	public Button cancelBackBtn;
 	@FXML
 	public ProgressBar validationProgressBar;
+	@FXML
 	public TextArea validationConsole;
-
 
 	private ValidationTask validationTask;
 
-	private File outputFile;
-	private File selectedDirectory;
-
 	// Don't want ValidationController object to be re-used, so a new one will be
 	// created each time validation scene is set
-	public ValidationController(File selectedDirectory, File outputFile) {
+	ValidationController() {
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("validate.fxml"));
 		fxmlLoader.setRoot(this);
 		fxmlLoader.setController(this);
@@ -52,10 +48,7 @@ public class ValidationController extends AnchorPane{
 			throw new RuntimeException(exception);
 		}
 
-		this.selectedDirectory = selectedDirectory;
-		this.outputFile = outputFile;
-
-		validationTask = new ValidationTask(selectedDirectory, outputFile);
+		validationTask = new ValidationTask();
 
 		validationProgressBar.progressProperty().unbind();
 		validationProgressBar.progressProperty().bind(validationTask.progressProperty());
@@ -96,26 +89,20 @@ public class ValidationController extends AnchorPane{
 
 		retryBtn.setDisable(false);
 		retryBtn.setOnAction(event1 -> {
-			primaryStage.setScene(new Scene(new ValidationController(selectedDirectory, outputFile)));
+			primaryStage.setScene(new Scene(new ValidationController()));
 		});
 	}
 
-	public static class ValidationTask extends Task {
-
-		private File selectedDirectory;
-		private File outputFile;
+	private static class ValidationTask extends Task {
 
 		private String errors = "";
 
-		public ValidationTask(File selectedDirectory, File outputFile) {
-			this.selectedDirectory = selectedDirectory;
-			this.outputFile = outputFile;
-		}
+		ValidationTask() {}
 
 		@Override
 		protected Boolean call() throws Exception {
 
-			final List<File> filesToCheck = getFilesToCheck(selectedDirectory);
+			final List<File> filesToCheck = getFilesToCheck(FileSelectController.getSelectedDirectory());
 
 			//filesToCheck may be null due to Task cancellation or some other error
 			if (filesToCheck == null)
@@ -131,7 +118,10 @@ public class ValidationController extends AnchorPane{
 				}
 
 				try {
+					//Check if file is already open
 					XSSFWorkbook workbook = new XSSFWorkbook(f);
+
+					//Check names
 					if(workbook.getName("AMT") == null) {
 						errors += "- AMT cell name missing in \"" + f.getName() + "\"\n";
 					}
@@ -142,7 +132,7 @@ public class ValidationController extends AnchorPane{
 					if(e.getMessage().contains("(The process cannot access the file because it is being used by another process)"))
 						errors += "- Close file: \"" + f.getName() + "\"\n";
 					else
-						errors += e.getMessage();
+						errors += e.toString();
 				}
 				updateProgress(++currentProgress, filesToCheck.size());
 			}
@@ -153,6 +143,7 @@ public class ValidationController extends AnchorPane{
 			}
 
 			//Check if outputFile is open
+			File outputFile = FileSelectController.getOutputFile();
 			if(outputFile.exists()) {
 				try {
 					//Don't understand why this is necessary, prevents a Zip bomb error
@@ -174,15 +165,11 @@ public class ValidationController extends AnchorPane{
 		}
 
 		private List<File> getFilesToCheck(File rootDirectory) {
-//			if(!rootDirectory.isDirectory()) {
-//				errors += "- Selected file is not a directory\n";
-//				return null;
-//			}
 
 			ArrayList<File> filesToCheck = new ArrayList<>();
 
 			//Get Portfolio directories ignoring files and hidden directories
-			File[] subDirectories = rootDirectory.listFiles(file -> {
+			File[] portfolioDirectories = rootDirectory.listFiles(file -> {
 				if(file.isHidden())
 					return false;
 				else if(file.isDirectory())
@@ -190,17 +177,17 @@ public class ValidationController extends AnchorPane{
 				return false;
 			});
 
-			assert subDirectories != null;
-			//Get Committee excel files ignoring any hidden files
-			for(File subDirectory : subDirectories) {
+			assert portfolioDirectories != null;
+			for(File portfolioDirectory : portfolioDirectories) {
 
 				if(isCancelled()) {
 					updateMessage("Cancelled");
 					return null;
 				}
 
+				//Get Committee excel committeeFiles ignoring any hidden committeeFiles
 				//noinspection ConstantConditions
-				File[] files = subDirectory.listFiles(file -> {
+				File[] committeeFiles = portfolioDirectory.listFiles(file -> {
 					if (file.isHidden())
 						return false;
 					else if (file.getName().endsWith(".xlsx"))
@@ -208,12 +195,12 @@ public class ValidationController extends AnchorPane{
 					return false;
 				});
 
-				if(files.length == 0)
-					errors += "- Portfolio \"" + subDirectory.getName() + "\" contains no committee budgets\n";
-				Collections.addAll(filesToCheck, files);
+				assert committeeFiles != null;
+				if(committeeFiles.length == 0)
+					errors += "- Portfolio \"" + portfolioDirectory.getName() + "\" contains no committee budgets\n";
+				Collections.addAll(filesToCheck, committeeFiles);
 			}
 			return filesToCheck;
 		}
-
 	}
 }

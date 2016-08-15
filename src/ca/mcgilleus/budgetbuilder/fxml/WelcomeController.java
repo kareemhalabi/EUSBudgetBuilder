@@ -1,13 +1,9 @@
 package ca.mcgilleus.budgetbuilder.fxml;
 
-import ca.mcgilleus.budgetbuilder.application.BudgetWizzard;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 
-import java.io.File;
 import java.io.IOException;
 
 import static ca.mcgilleus.budgetbuilder.application.BudgetWizzard.primaryStage;
@@ -17,20 +13,12 @@ import static ca.mcgilleus.budgetbuilder.application.BudgetWizzard.primaryStage;
  */
 public class WelcomeController extends AnchorPane{
 
-	private static WelcomeController theInstance;
 	private static Scene welcomeScene;
 
 	public static Scene getWelcomeScene() {
 		if (welcomeScene == null)
-			welcomeScene = new Scene(getInstance());
+			welcomeScene = new Scene(new WelcomeController());
 		return welcomeScene;
-	}
-
-	public static WelcomeController getInstance() {
-		if (theInstance == null)
-			theInstance = new WelcomeController();
-
-		return theInstance;
 	}
 
 	private WelcomeController() {
@@ -45,7 +33,7 @@ public class WelcomeController extends AnchorPane{
 		}
 	}
 
-	public void showFileSelectScene(ActionEvent actionEvent) {
+	public void showFileSelectScene() {
 		primaryStage.setScene(FileSelectController.getFileSelectScene());
 	}
 
