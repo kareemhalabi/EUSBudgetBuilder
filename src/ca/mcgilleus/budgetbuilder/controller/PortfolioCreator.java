@@ -5,26 +5,20 @@
 
 package ca.mcgilleus.budgetbuilder.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Queue;
-
-import org.apache.poi.EncryptedDocumentException;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import ca.mcgilleus.budgetbuilder.model.CommitteeBudget;
 import ca.mcgilleus.budgetbuilder.model.EUSBudget;
 import ca.mcgilleus.budgetbuilder.model.Portfolio;
 import ca.mcgilleus.budgetbuilder.util.Styles;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.xssf.usermodel.*;
+
+import java.io.File;
+import java.util.LinkedList;
+import java.util.Queue;
+
+import static ca.mcgilleus.budgetbuilder.controller.BudgetBuilder.*;
 
 public class PortfolioCreator {
 	
@@ -48,23 +42,24 @@ public class PortfolioCreator {
 	
 	/**
 	 * Creates an EUS portfolio from a directory
-	 * @param f The root directory of the portfolio
+	 * @param portfolioDirectory The root directory of the portfolio
 	 * @param budget Budget to add portfolio to  
 	 */
-	public static void createPortfolio(File f, EUSBudget budget) {
-		p = new Portfolio(f.getName(), budget);
+	public static void createPortfolio(File portfolioDirectory, EUSBudget budget) {
+		p = new Portfolio(portfolioDirectory.getName(), budget);
 
-System.out.println("Compiling portfolio: " + p.getName());
+		buildTask.updateBuildMessage("Compiling portfolio: " + p.getName());
 
 		budget.getWorkbook().createSheet(p.getName());
-		File[] portfolioFiles = f.listFiles();
 
-		for (File pF : portfolioFiles) {
+		for (File committeeFile : getCommitteeFiles(portfolioDirectory)) {
+			if(buildTask.isCancelled()) {
+				return;
+			}
 			try {
-				CommitteeCreator.createCommitteeBudget(availableTabColors.peek(), p, pF);
-			} catch (EncryptedDocumentException | InvalidFormatException | IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				CommitteeCreator.createCommitteeBudget(availableTabColors.peek(), p, committeeFile);
+			} catch (Exception e) {
+				buildTask.updateBuildMessage(e.toString());
 			}
 		}
 
@@ -115,7 +110,8 @@ System.out.println("Compiling portfolio: " + p.getName());
 		
 		stylePortfolioOverview(overviewSheet);
 		
-System.out.println("\t Overview done!");		
+		buildTask.updateBuildMessage("\t Overview done!");
+		buildTask.updateBuildProgress(++currentProgress, totalProgress);
 	}
 
 	private static void stylePortfolioOverview(XSSFSheet overviewSheet) {
@@ -165,5 +161,15 @@ System.out.println("\t Overview done!");
 		}
 		
 		//Total styles done in BudgetBuilder.writeTotals()
+	}
+
+	static File[] getCommitteeFiles(File portfolioDirectory) {
+		return portfolioDirectory.listFiles(file -> {
+							if (file.isHidden())
+								return false;
+							else if (file.getName().endsWith(".xlsx"))
+								return true;
+							return false;
+						});
 	}
 }

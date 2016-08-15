@@ -29,12 +29,12 @@ public class FileSelectController extends AnchorPane{
 	public Button fileSelectNextBtn;
 
 	private static File outputFile;
-	static File getOutputFile() {
+	public static File getOutputFile() {
 		return outputFile;
 	}
 
 	private static File selectedDirectory;
-	static File getSelectedDirectory() {
+	public static File getSelectedDirectory() {
 		return selectedDirectory;
 	}
 
