@@ -62,6 +62,7 @@ public class BuildController extends AnchorPane{
 				finishBtn.setDisable(false);
 				finishBtn.setOnAction(event1 -> {
 					try {
+						primaryStage.hide();
 						Desktop.getDesktop().open(FileSelectController.getOutputFile());
 						Platform.exit();
 						System.exit(0);
