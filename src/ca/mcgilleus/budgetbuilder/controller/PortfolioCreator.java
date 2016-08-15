@@ -15,58 +15,39 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.*;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.Queue;
 
 import static ca.mcgilleus.budgetbuilder.controller.BudgetBuilder.*;
 
 public class PortfolioCreator {
-	
-	private static Queue<IndexedColors> allColors;
-	private static Queue<IndexedColors> availableTabColors;
+
 	private static IndexedColors currentColor;
 	private static Portfolio p;
-	
-	public static Queue<IndexedColors> getAllColors() {
-		return allColors;
-	}
 
-	public static void setAllColors(Queue<IndexedColors> allColors) {
-		PortfolioCreator.allColors = allColors;
-		recreateColorQueue();
-	}
-	
-	private static void recreateColorQueue() {
-		availableTabColors = new LinkedList<IndexedColors>(allColors);
-	}
-	
 	/**
 	 * Creates an EUS portfolio from a directory
 	 * @param portfolioDirectory The root directory of the portfolio
 	 * @param budget Budget to add portfolio to  
 	 */
 	public static void createPortfolio(File portfolioDirectory, EUSBudget budget) {
+
 		p = new Portfolio(portfolioDirectory.getName(), budget);
 
 		buildTask.updateBuildMessage("Compiling portfolio: " + p.getName());
 
 		budget.getWorkbook().createSheet(p.getName());
 
+		currentColor = Styles.popTabColor();
+
 		for (File committeeFile : getCommitteeFiles(portfolioDirectory)) {
 			if(buildTask.isCancelled()) {
 				return;
 			}
 			try {
-				CommitteeCreator.createCommitteeBudget(availableTabColors.peek(), p, committeeFile);
+				CommitteeCreator.createCommitteeBudget(currentColor, p, committeeFile);
 			} catch (Exception e) {
 				buildTask.updateBuildMessage(e.toString());
 			}
 		}
-
-		currentColor = availableTabColors.poll();
-
-		if (availableTabColors.isEmpty())
-			recreateColorQueue();
 
 		createPortfolioOverView(p);
 	}

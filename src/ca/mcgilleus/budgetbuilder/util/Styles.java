@@ -14,6 +14,25 @@ public final class Styles {
 	public static final CellStyle TOTAL_LABEL_STYLE;
 	public static final CellStyle TOTAL_CELL_STYLE;
 
+	private static int currentColor = 0;
+	private static IndexedColors[] colors = {
+		IndexedColors.MAROON,
+		IndexedColors.LIGHT_ORANGE,
+		IndexedColors.YELLOW,
+		IndexedColors.GREEN,
+		IndexedColors.BLUE,
+		IndexedColors.PLUM,
+		IndexedColors.GREY_40_PERCENT
+	};
+
+	public static IndexedColors popTabColor() {
+		return colors[(currentColor++)%colors.length];
+	}
+
+	public static IndexedColors peekTabColor() {
+		return colors[currentColor % colors.length];
+	}
+
 	//initialize styles
 	static {
 		HEADER_STYLE = BudgetBuilder.getWorkbook().createCellStyle();

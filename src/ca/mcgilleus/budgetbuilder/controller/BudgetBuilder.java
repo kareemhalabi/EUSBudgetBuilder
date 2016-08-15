@@ -13,7 +13,6 @@ import ca.mcgilleus.budgetbuilder.util.Styles;
 import javafx.concurrent.Task;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -27,7 +26,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import java.util.Queue;
 
 public class BudgetBuilder {
 
@@ -54,10 +52,7 @@ public class BudgetBuilder {
 
 		wb.createSheet(budget.getBudgetYear() + " Budget");
 
-		Queue<IndexedColors> availableTabColors = new LinkedList<>();
-		createColorQueue(availableTabColors);
 
-		PortfolioCreator.setAllColors(availableTabColors);
 
 		for(File f : root.listFiles()) {
 			PortfolioCreator.createPortfolio(f, budget);
@@ -150,17 +145,6 @@ System.out.println("Compiling EUS Budget Overview");
 			for (int k = 2; k < dataRow.getLastCellNum(); k++)
 				dataRow.getCell(k).setCellStyle(Styles.CURRENCY_CELL_STYLE);
 		}
-
-	}
-
-	public static void createColorQueue(Queue<IndexedColors> colors) {
-		colors.add(IndexedColors.MAROON);
-		colors.add(IndexedColors.LIGHT_ORANGE);
-		colors.add(IndexedColors.YELLOW);
-		colors.add(IndexedColors.GREEN);
-		colors.add(IndexedColors.BLUE);
-		colors.add(IndexedColors.PLUM);
-		colors.add(IndexedColors.GREY_40_PERCENT);
 
 	}
 
@@ -320,11 +304,6 @@ System.out.println("Compiling EUS Budget Overview");
 			wb = budget.getWorkbook();
 
 			wb.createSheet(budget.getBudgetYear() + " Budget");
-
-			Queue<IndexedColors> availableTabColors = new LinkedList<>();
-			createColorQueue(availableTabColors);
-
-			PortfolioCreator.setAllColors(availableTabColors);
 
 			File[] portfolioDirectories = getPortfolioDirectories(FileSelectController.getSelectedDirectory());
 
