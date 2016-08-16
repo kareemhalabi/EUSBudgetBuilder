@@ -59,6 +59,7 @@ public class BuildController extends AnchorPane{
 
 		buildTask.setOnSucceeded(event -> {
 			if((boolean)buildTask.getValue()) {
+				cancelBackBtn.setDisable(true);
 				finishBtn.setDisable(false);
 				finishBtn.setOnAction(event1 -> {
 					try {
