@@ -12,7 +12,7 @@ import javafx.scene.layout.AnchorPane;
 import java.awt.*;
 import java.io.IOException;
 
-import static ca.mcgilleus.budgetbuilder.application.BudgetWizzard.primaryStage;
+import static ca.mcgilleus.budgetbuilder.application.BudgetWizard.primaryStage;
 
 /*
  * Created by Kareem Halabi on 2016-08-08.

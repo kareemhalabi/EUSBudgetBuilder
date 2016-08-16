@@ -5,12 +5,12 @@ package ca.mcgilleus.budgetbuilder.application;
 
 import ca.mcgilleus.budgetbuilder.fxml.WelcomeController;
 import javafx.application.Application;
-import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+
 import java.io.IOException;
 
-public class BudgetWizzard extends Application {
+public class BudgetWizard extends Application {
 
 	public static Stage primaryStage;
 
@@ -23,6 +23,7 @@ public class BudgetWizzard extends Application {
 		primaryStage.setResizable(false);
 		primaryStage.getIcons().add(new Image("ca/mcgilleus/budgetbuilder/EUSfavicon.png"));
 		primaryStage.setScene(WelcomeController.getWelcomeScene());
+		primaryStage.sizeToScene();
 		primaryStage.show();
 	}
 }
