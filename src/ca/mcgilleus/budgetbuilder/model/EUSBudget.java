@@ -2,9 +2,10 @@
 /*This code was generated using the UMPLE 1.22.0.5146 modeling language!*/
 
 package ca.mcgilleus.budgetbuilder.model;
-import java.util.*;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.util.*;
 
 // line 3 "../../../../Model.ump"
 // line 18 "../../../../Model.ump"
@@ -51,7 +52,11 @@ public class EUSBudget
   {
     return year;
   }
-  
+
+  /**
+   * Returns this budget's school year
+   * @return a string representing the current school year
+   */
   public String getBudgetYear() {
 		Calendar c = Calendar.getInstance();
 		c.setTime(this.year);
@@ -59,7 +64,7 @@ public class EUSBudget
 		return c.get(Calendar.YEAR) + "-" + (c.get(Calendar.YEAR) +1);
   }
 
-  public XSSFWorkbook getWorkbook() {
+  public XSSFWorkbook getWb() {
 	return budget;
 }
 

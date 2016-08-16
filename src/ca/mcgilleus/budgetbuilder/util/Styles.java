@@ -21,17 +21,9 @@ public final class Styles {
 		IndexedColors.YELLOW,
 		IndexedColors.GREEN,
 		IndexedColors.BLUE,
-		IndexedColors.PLUM,
+		IndexedColors.LAVENDER,
 		IndexedColors.GREY_40_PERCENT
 	};
-
-	public static IndexedColors popTabColor() {
-		return colors[(currentColor++)%colors.length];
-	}
-
-	public static IndexedColors peekTabColor() {
-		return colors[currentColor % colors.length];
-	}
 
 	//initialize styles
 	static {
@@ -42,19 +34,19 @@ public final class Styles {
 	    headerFont.setColor(IndexedColors.WHITE.getIndex());
 	    headerFont.setBold(true);
 	    headerFont.setItalic(false);
-	
+
 		HEADER_STYLE.setFont(headerFont);
-		
+
 		HEADER_STYLE.setWrapText(true);
-	    
+
 		HEADER_STYLE.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
 		HEADER_STYLE.setAlignment(CellStyle.ALIGN_CENTER);
 
 		HEADER_STYLE.setFillForegroundColor(IndexedColors.BLACK.getIndex());
 		HEADER_STYLE.setFillPattern(CellStyle.SOLID_FOREGROUND);
-		
+
 		//----------------------------------------------------------------
-		
+
 		PORTFOLIO_LABEL_STYLE = BudgetBuilder.getWorkbook().createCellStyle();
 		XSSFFont basicFont= BudgetBuilder.getWorkbook().createFont();
 		basicFont.setFontHeightInPoints((short)10);
@@ -62,40 +54,40 @@ public final class Styles {
 		basicFont.setColor(IndexedColors.BLACK.getIndex());
 		basicFont.setBold(false);
 		basicFont.setItalic(false);
-		
+
 		PORTFOLIO_LABEL_STYLE.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
 		PORTFOLIO_LABEL_STYLE.setAlignment(CellStyle.ALIGN_CENTER);
-		
+
 		PORTFOLIO_LABEL_STYLE.setFillForegroundColor(IndexedColors.GREY_80_PERCENT.getIndex());
 		PORTFOLIO_LABEL_STYLE.setFillPattern(CellStyle.SOLID_FOREGROUND);
-		
+
 		//----------------------------------------------------------------
-		
+
 		COMMITTEE_LABEL_STYLE = BudgetBuilder.getWorkbook().createCellStyle();
-		
+
 		COMMITTEE_LABEL_STYLE.setFont(basicFont);
-		
+
 		COMMITTEE_LABEL_STYLE.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
 		COMMITTEE_LABEL_STYLE.setAlignment(CellStyle.ALIGN_LEFT);
-		
+
 		COMMITTEE_LABEL_STYLE.setBorderRight(CellStyle.BORDER_THIN);
 		COMMITTEE_LABEL_STYLE.setRightBorderColor(IndexedColors.BLACK.getIndex());
-		
-		
+
+
 		//----------------------------------------------------------------
-		
+
 		CURRENCY_CELL_STYLE = BudgetBuilder.getWorkbook().createCellStyle();
-		
+
 	    CURRENCY_CELL_STYLE.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
 		CURRENCY_CELL_STYLE.setAlignment(CellStyle.ALIGN_RIGHT);
-		
+
 		CURRENCY_CELL_STYLE.setBorderRight(CellStyle.BORDER_THIN);
 		CURRENCY_CELL_STYLE.setRightBorderColor(IndexedColors.BLACK.getIndex());
-		
+
 		CURRENCY_CELL_STYLE.setDataFormat((short) 8); // ($#,##0.00_);[Red]($#,##0.00)
-		
+
 		//----------------------------------------------------------------
-		
+
 		TOTAL_LABEL_STYLE = BudgetBuilder.getWorkbook().createCellStyle();
 		XSSFFont totalFont= BudgetBuilder.getWorkbook().createFont();
 	    totalFont.setFontHeightInPoints((short)10);
@@ -103,23 +95,40 @@ public final class Styles {
 	    totalFont.setColor(IndexedColors.BLACK.getIndex());
 	    totalFont.setBold(true);
 	    totalFont.setItalic(false);
-		
+
 		TOTAL_LABEL_STYLE.setFont(totalFont);
-		
+
 	    TOTAL_LABEL_STYLE.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
 		TOTAL_LABEL_STYLE.setAlignment(CellStyle.ALIGN_LEFT);
-		
+
 		//----------------------------------------------------------------
-		
+
 		TOTAL_CELL_STYLE = BudgetBuilder.getWorkbook().createCellStyle();
-		
+
 	    TOTAL_CELL_STYLE.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
 		TOTAL_CELL_STYLE.setAlignment(CellStyle.ALIGN_RIGHT);
-		
+
 		TOTAL_CELL_STYLE.setBorderTop(CellStyle.BORDER_DOUBLE);
 		TOTAL_CELL_STYLE.setTopBorderColor(IndexedColors.BLACK.getIndex());
-		
+
 		TOTAL_CELL_STYLE.setDataFormat((short) 8); // ($#,##0.00_);[Red]($#,##0.00)
 	}
 
+	public static IndexedColors popTabColor() {
+		return colors[(currentColor++)%colors.length];
+	}
+
+	public static CellStyle getPortfolioLabelStyle(IndexedColors color) {
+		CellStyle customPortfolioStyle = BudgetBuilder.getWorkbook().createCellStyle();
+		customPortfolioStyle.cloneStyleFrom(Styles.PORTFOLIO_LABEL_STYLE);
+		XSSFFont customPortfolioFont = BudgetBuilder.getWorkbook().createFont();
+		customPortfolioFont.setFontHeightInPoints((short)10);
+		customPortfolioFont.setFontName("Arial");
+		customPortfolioFont.setColor(color.getIndex());
+		customPortfolioFont.setBold(false);
+		customPortfolioFont.setItalic(false);
+		customPortfolioStyle.setFont(customPortfolioFont);
+
+		return customPortfolioStyle;
+	}
 }

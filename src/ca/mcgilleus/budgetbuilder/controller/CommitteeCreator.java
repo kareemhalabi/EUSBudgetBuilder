@@ -11,7 +11,6 @@ import ca.mcgilleus.budgetbuilder.util.Cloner;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Name;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -28,7 +27,7 @@ public class CommitteeCreator {
 	public static void createCommitteeBudget(IndexedColors color, Portfolio p, File committeeFile)
 			throws IOException, InvalidFormatException {
 
-		XSSFWorkbook committeeWB = (XSSFWorkbook) WorkbookFactory.create(committeeFile);
+		XSSFWorkbook committeeWB = new XSSFWorkbook(committeeFile);
 		XSSFSheet committeeSheet = committeeWB.getSheetAt(0);
 
 		Name name = committeeWB.getName("COMM_NAME");
@@ -56,6 +55,8 @@ public class CommitteeCreator {
 		Cloner.cloneSheet(committeeSheet, bSheet);
 
 		bSheet.setTabColor(color.getIndex());
+
+		committeeWB.close();
 
 		buildTask.updateBuildMessage("\t -" + sheetName);
 		buildTask.updateBuildProgress(++currentProgress, totalProgress);
