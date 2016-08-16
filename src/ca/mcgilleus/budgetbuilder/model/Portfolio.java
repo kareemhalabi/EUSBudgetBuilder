@@ -2,9 +2,12 @@
 /*This code was generated using the UMPLE 1.22.0.5146 modeling language!*/
 
 package ca.mcgilleus.budgetbuilder.model;
-import java.util.*;
 
 import org.apache.poi.ss.usermodel.CellStyle;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 // line 9 "../../../../Model.ump"
 // line 30 "../../../../Model.ump"
@@ -95,9 +98,9 @@ public class Portfolio
     return 0;
   }
 
-  public CommitteeBudget addCommitteeBudget(String aName, String amtRequestedRef)
+  public CommitteeBudget addCommitteeBudget(String aName, String revRef, String expRef)
   {
-    return new CommitteeBudget(aName, amtRequestedRef, this);
+    return new CommitteeBudget(aName, revRef, expRef, this);
   }
 
   public boolean addCommitteeBudget(CommitteeBudget aCommitteeBudget)

@@ -60,11 +60,14 @@ public class BudgetBuilder {
 						XSSFWorkbook workbook = new XSSFWorkbook(f);
 
 						//Check names
-						if(workbook.getName("AMT") == null) {
-							errors += "- AMT cell name missing in \"" + f.getName() + "\"\n";
+						if(workbook.getName("REV") == null) {
+							errors += "- REV cell name missing in \"" + f.getName() + "\"\n";
 						}
-						if(workbook.getName("COMM_NAME") == null) {
-							errors += "- COMM_NAME cell name missing in \"" + f.getName() + "\"\n";
+						if(workbook.getName("EXP") == null) {
+							errors += "- EXP cell name missing in \"" + f.getName() + "\"\n";
+						}
+						if(workbook.getName("NAME") == null) {
+							errors += "- NAME cell name missing in \"" + f.getName() + "\"\n";
 						}
 
 						workbook.close();

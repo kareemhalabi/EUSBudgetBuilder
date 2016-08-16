@@ -14,7 +14,8 @@ public class CommitteeBudget {
 
 	// CommitteeBudget Attributes
 	private String name;
-	private String amtRequestedRef;
+	private String revRef;
+	private String expRef;
 
 	// CommitteeBudget Associations
 	private Portfolio portfolio;
@@ -23,9 +24,10 @@ public class CommitteeBudget {
 	// CONSTRUCTOR
 	// ------------------------
 
-	public CommitteeBudget(String aName, String aAmtRequestedRef, Portfolio aPortfolio) {
+	public CommitteeBudget(String aName, String aRevRef, String aExpRef, Portfolio aPortfolio) {
 		name = aName;
-		amtRequestedRef = aAmtRequestedRef;
+		revRef = aRevRef;
+		expRef = aExpRef;
 		boolean didAddPortfolio = setPortfolio(aPortfolio);
 		if (!didAddPortfolio) {
 			throw new RuntimeException("Unable to create committeeBudget due to portfolio");
@@ -43,9 +45,16 @@ public class CommitteeBudget {
 		return wasSet;
 	}
 
-	public boolean setAmtRequestedRef(String aAmtRequestedRef) {
+	public boolean setRevRef(String aRevRef) {
 		boolean wasSet = false;
-		amtRequestedRef = aAmtRequestedRef;
+		revRef = aRevRef;
+		wasSet = true;
+		return wasSet;
+	}
+
+	public boolean setExpRef(String aExpRef) {
+		boolean wasSet = false;
+		expRef = aExpRef;
 		wasSet = true;
 		return wasSet;
 	}
@@ -54,8 +63,12 @@ public class CommitteeBudget {
 		return name;
 	}
 
-	public String getAmtRequestedRef() {
-		return amtRequestedRef;
+	public String getRevRef() {
+		return revRef;
+	}
+
+	public String getExpRef() {
+		return expRef;
 	}
 
 	public Portfolio getPortfolio() {
@@ -86,8 +99,8 @@ public class CommitteeBudget {
 
 	public String toString() {
 		String outputString = "";
-		return super.toString() + "[" + "name" + ":" + getName() + "," + "amtRequestedRef" + ":" + getAmtRequestedRef()
-				+ "]" + System.getProperties().getProperty("line.separator") + "  " + "portfolio = "
+		return super.toString() + "[" + "name" + ":" + getName() + "," + "revRef" + ":" + getRevRef()
+				+ "expRef" + ":" + getExpRef() + "]" + System.getProperties().getProperty("line.separator") + "  " + "portfolio = "
 				+ (getPortfolio() != null ? Integer.toHexString(System.identityHashCode(getPortfolio())) : "null")
 				+ outputString;
 	}

@@ -64,15 +64,20 @@ public class PortfolioCreator {
 	public static void writeHeader(EUSBudget budget, XSSFSheet overviewSheet) {
 		XSSFRow header = overviewSheet.createRow(0);
 
-		XSSFCell title = header.createCell(0, Cell.CELL_TYPE_STRING);
-		title.setCellValue("Portfolio");
+		XSSFCell portfolio = header.createCell(0, Cell.CELL_TYPE_STRING);
+		portfolio.setCellValue("Portfolio");
 
-		title = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
-		title.setCellValue("Committee");
+		XSSFCell committee = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
+		committee.setCellValue("Committee");
 
-		title = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
+		XSSFCell rev = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
+		rev.setCellValue(budget.getBudgetYear() + " Revenues");
 
-		title.setCellValue(budget.getBudgetYear() + " Budget");
+		XSSFCell exp = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
+		exp.setCellValue(budget.getBudgetYear() + " Expenses");
+
+		XSSFCell budgetTitle = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
+		budgetTitle.setCellValue(budget.getBudgetYear() + " Budget");
 
 		//Apply Header styles
 		for(Cell cell : header) {
@@ -108,8 +113,16 @@ public class PortfolioCreator {
 			committeeName.setCellValue(committee.getName());
 			committeeName.setCellStyle(Styles.COMMITTEE_LABEL_STYLE);
 
+			XSSFCell committeeRev = committeeRow.createCell(committeeRow.getLastCellNum(), Cell.CELL_TYPE_FORMULA);
+			committeeRev.setCellFormula(committee.getRevRef());
+			committeeRev.setCellStyle(Styles.CURRENCY_CELL_STYLE);
+
+			XSSFCell committeeExp = committeeRow.createCell(committeeRow.getLastCellNum(), Cell.CELL_TYPE_FORMULA);
+			committeeExp.setCellFormula(committee.getExpRef());
+			committeeExp.setCellStyle(Styles.CURRENCY_CELL_STYLE);
+
 			XSSFCell committeeAmt = committeeRow.createCell(committeeRow.getLastCellNum(), Cell.CELL_TYPE_FORMULA);
-			committeeAmt.setCellFormula(committee.getAmtRequestedRef());
+			committeeAmt.setCellFormula(committee.getRevRef() + "-" + committee.getExpRef());
 			committeeAmt.setCellStyle(Styles.CURRENCY_CELL_STYLE);
 		}
 

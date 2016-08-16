@@ -30,7 +30,7 @@ public class CommitteeCreator {
 		XSSFWorkbook committeeWB = new XSSFWorkbook(committeeFile);
 		XSSFSheet committeeSheet = committeeWB.getSheetAt(0);
 
-		Name name = committeeWB.getName("COMM_NAME");
+		Name name = committeeWB.getName("NAME");
 		CellReference nameRef = new CellReference(name.getRefersToFormula());
 		XSSFRow nameRow = committeeSheet.getRow(nameRef.getRow());
 		XSSFCell nameCell = nameRow.getCell(nameRef.getCol());
@@ -47,9 +47,10 @@ public class CommitteeCreator {
 		// So that AMT reference has correct sheet name
 		committeeWB.setSheetName(0, sheetName);
 
-		Name amt = committeeWB.getName("AMT");
+		Name revRef = committeeWB.getName("REV");
+		Name expRef = committeeWB.getName("EXP");
 
-		new CommitteeBudget(sheetName, amt.getRefersToFormula(), p);
+		new CommitteeBudget(sheetName, revRef.getRefersToFormula(), expRef.getRefersToFormula(),  p);
 
 		XSSFSheet bSheet = BudgetBuilder.getWorkbook().createSheet(sheetName);
 		Cloner.cloneSheet(committeeSheet, bSheet);
