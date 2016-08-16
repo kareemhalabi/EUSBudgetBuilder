@@ -12,7 +12,11 @@ import ca.mcgilleus.budgetbuilder.util.Styles;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.xssf.usermodel.*;
+import org.apache.poi.ss.util.CellAddress;
+import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 import java.io.File;
 
@@ -21,7 +25,7 @@ import static ca.mcgilleus.budgetbuilder.controller.BudgetBuilder.*;
 public class PortfolioCreator {
 
 	private static IndexedColors currentColor;
-	private static Portfolio p;
+	private static Portfolio currentPortfolio;
 
 	/**
 	 * Creates an EUS portfolio from a directory
@@ -30,11 +34,11 @@ public class PortfolioCreator {
 	 */
 	public static void createPortfolio(File portfolioDirectory, EUSBudget budget) {
 
-		p = new Portfolio(portfolioDirectory.getName(), budget);
+		currentPortfolio = new Portfolio(portfolioDirectory.getName(), budget);
 
-		buildTask.updateBuildMessage("Compiling portfolio: " + p.getName());
+		buildTask.updateBuildMessage("Compiling portfolio: " + currentPortfolio.getName());
 
-		budget.getWorkbook().createSheet(p.getName());
+		XSSFSheet overviewSheet = budget.getWb().createSheet(currentPortfolio.getName());
 
 		currentColor = Styles.popTabColor();
 
@@ -43,114 +47,122 @@ public class PortfolioCreator {
 				return;
 			}
 			try {
-				CommitteeCreator.createCommitteeBudget(currentColor, p, committeeFile);
+				CommitteeCreator.createCommitteeBudget(currentColor, currentPortfolio, committeeFile);
 			} catch (Exception e) {
 				buildTask.updateBuildMessage(e.toString());
 			}
 		}
 
-		createPortfolioOverView(p);
-	}
+		writeHeader(budget, overviewSheet);
+		createPortfolioOverview(currentPortfolio, overviewSheet);
+		writeTotals(overviewSheet);
 
-	/**
-	 * Creates Portfolio Overview page showing amounts requested by portfolio's committees
-	 * @param p The porfilo overview to create
-	 */
-	private static void createPortfolioOverView(Portfolio p) {
-		
-		XSSFWorkbook wb = p.getEUSBudget().getWorkbook();
-		
-		XSSFSheet overviewSheet = wb.getSheet(p.getName());	
-		XSSFRow header = overviewSheet.createRow(0);
-		
-		XSSFCell title = header.createCell(0, Cell.CELL_TYPE_STRING);
-		title.setCellValue("Function");
-		
-		title = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
-		title.setCellValue("Committee");
-		
-		title = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
-		
-		title.setCellValue(p.getEUSBudget().getBudgetYear() + " Budget");
-		
-		for(int i = 0; i < p.getCommitteeBudgets().size(); i++) {
-			CommitteeBudget committee = p.getCommitteeBudget(i);
-			XSSFRow committeeRow = overviewSheet.createRow(i+1);
-			
-			XSSFCell committeeFunction = committeeRow.createCell(0, Cell.CELL_TYPE_STRING);
-			committeeFunction.setCellValue(p.getName());
-			
-			XSSFCell committeeName = committeeRow.createCell(committeeRow.getLastCellNum(), Cell.CELL_TYPE_STRING);
-			committeeName.setCellValue(committee.getName());
-			
-			XSSFCell committeeAmt = committeeRow.createCell(committeeRow.getLastCellNum(), Cell.CELL_TYPE_FORMULA);
-			committeeAmt.setCellFormula(committee.getAmtRequestedRef());
-		}
-		
-		BudgetBuilder.writeTotals(overviewSheet);
-		
-		stylePortfolioOverview(overviewSheet);
-		
 		buildTask.updateBuildMessage("\t Overview done!");
 		buildTask.updateBuildProgress(++currentProgress, totalProgress);
 	}
 
-	private static void stylePortfolioOverview(XSSFSheet overviewSheet) {
-		
-		XSSFRow header = overviewSheet.getRow(0);
-		
-		//Fix Column Widths
-		for(int i = 0; i < header.getLastCellNum(); i++) {
-			overviewSheet.autoSizeColumn(i);
-			int adjustedWidth = overviewSheet.getColumnWidth(i) + 256*3;
-			
-			if(adjustedWidth > 5000)
-				adjustedWidth = 5000;
-			
-			overviewSheet.setColumnWidth(i, adjustedWidth);
-		}
-		
+	public static void writeHeader(EUSBudget budget, XSSFSheet overviewSheet) {
+		XSSFRow header = overviewSheet.createRow(0);
+
+		XSSFCell title = header.createCell(0, Cell.CELL_TYPE_STRING);
+		title.setCellValue("Portfolio");
+
+		title = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
+		title.setCellValue("Committee");
+
+		title = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
+
+		title.setCellValue(budget.getBudgetYear() + " Budget");
+
 		//Apply Header styles
 		for(Cell cell : header) {
 			cell.setCellStyle(Styles.HEADER_STYLE);
 		}
-		
-		//Apply Data styles
-		
-		CellStyle customPortfolioStyle = BudgetBuilder.getWorkbook().createCellStyle();
-		customPortfolioStyle.cloneStyleFrom(Styles.PORTFOLIO_LABEL_STYLE);
-		XSSFFont customPortfolioFont = BudgetBuilder.getWorkbook().createFont();
-		customPortfolioFont.setFontHeightInPoints((short)10);
-		customPortfolioFont.setFontName("Arial");
-		customPortfolioFont.setColor(currentColor.getIndex());
-		customPortfolioFont.setBold(false);
-		customPortfolioFont.setItalic(false);
-		
-		customPortfolioStyle.setFont(customPortfolioFont);
-		
-		p.setPortfolioLabelStyle(customPortfolioStyle);
-		
-		for(int j = 1; j < overviewSheet.getLastRowNum()-1; j++) {
-			XSSFRow dataRow = overviewSheet.getRow(j);
-			
-			dataRow.getCell(0).setCellStyle(customPortfolioStyle);
-			
-			dataRow.getCell(1).setCellStyle(Styles.COMMITTEE_LABEL_STYLE);
-			
-			for(int k = 2; k < dataRow.getLastCellNum(); k++)
-				dataRow.getCell(k).setCellStyle(Styles.CURRENCY_CELL_STYLE);
+	}
+
+	/**
+	 * Creates and styles overview rows outlining each Portfolio, Committee and the amount they requested.
+	 * The Portfolio and Committee name cells are string values whereas the Committee amounts are
+	 * cell references to the amount requested on the Committee's sheet.
+	 *
+	 * @param p The porfirio overview to create
+	 * @param overviewSheet The sheet to write the overview rows
+	 */
+	public static void createPortfolioOverview(Portfolio p, XSSFSheet overviewSheet) {
+
+		//Prevents duplicate CellStyles for Portfolio overview and Budget overview
+		if(p.getPortfolioLabelStyle() == null) {
+			p.setPortfolioLabelStyle(Styles.getPortfolioLabelStyle(currentColor));
 		}
-		
-		//Total styles done in BudgetBuilder.writeTotals()
+		CellStyle customPortfolioStyle = p.getPortfolioLabelStyle();
+
+		for(CommitteeBudget committee : p.getCommitteeBudgets()) {
+			//getLastRowNum()+1 because starts on second row
+			XSSFRow committeeRow = overviewSheet.createRow(overviewSheet.getLastRowNum()+1);
+
+			XSSFCell portfolioLabel = committeeRow.createCell(0, Cell.CELL_TYPE_STRING);
+			portfolioLabel.setCellValue(p.getName());
+			portfolioLabel.setCellStyle(customPortfolioStyle);
+
+			XSSFCell committeeName = committeeRow.createCell(committeeRow.getLastCellNum(), Cell.CELL_TYPE_STRING);
+			committeeName.setCellValue(committee.getName());
+			committeeName.setCellStyle(Styles.COMMITTEE_LABEL_STYLE);
+
+			XSSFCell committeeAmt = committeeRow.createCell(committeeRow.getLastCellNum(), Cell.CELL_TYPE_FORMULA);
+			committeeAmt.setCellFormula(committee.getAmtRequestedRef());
+			committeeAmt.setCellStyle(Styles.CURRENCY_CELL_STYLE);
+		}
+
+		XSSFRow header = overviewSheet.getRow(0);
+		//Fix Column Widths
+		for(int i = 0; i < header.getLastCellNum(); i++) {
+			overviewSheet.autoSizeColumn(i);
+			int adjustedWidth = overviewSheet.getColumnWidth(i) + 256*3;
+
+			if(adjustedWidth > 5000)
+				adjustedWidth = 5000;
+
+			overviewSheet.setColumnWidth(i, adjustedWidth);
+		}
+	}
+
+	/**
+	 * Creates total cells representing the sum of all numerical cells above it.
+	 * There is a blank row between the last entry and total row.
+	 * Total cell styling is also done in this method
+	 *
+	 * @param overviewSheet the sheet to write totals to
+	 */
+	public static void writeTotals(XSSFSheet overviewSheet) {
+
+		XSSFRow totals = overviewSheet.createRow(overviewSheet.getLastRowNum()+2);
+		XSSFCell totalLabel = totals.createCell(1, Cell.CELL_TYPE_STRING);
+		totalLabel.setCellValue("Totals");
+
+		for(int j = totals.getFirstCellNum() + 1;
+			j < overviewSheet.getRow(0).getLastCellNum(); j++) {
+
+			XSSFCell colTotal = totals.createCell(j, Cell.CELL_TYPE_FORMULA);
+			CellAddress ref = colTotal.getAddress();
+			String sumFormula = "SUM(" + CellReference.convertNumToColString(ref.getColumn()) + "2:" +
+					CellReference.convertNumToColString(ref.getColumn()) + (ref.getRow()-1) + ")";
+			colTotal.setCellFormula(sumFormula);
+		}
+
+		//Apply Total styles
+		totalLabel.setCellStyle(Styles.TOTAL_LABEL_STYLE);
+
+		for(int l = 2; l < totals.getLastCellNum(); l++)
+			totals.getCell(l).setCellStyle(Styles.TOTAL_CELL_STYLE);
 	}
 
 	static File[] getCommitteeFiles(File portfolioDirectory) {
 		return portfolioDirectory.listFiles(file -> {
-							if (file.isHidden())
-								return false;
-							else if (file.getName().endsWith(".xlsx"))
-								return true;
-							return false;
-						});
+			if (file.isHidden())
+				return false;
+			else if (file.getName().endsWith(".xlsx"))
+				return true;
+			return false;
+		});
 	}
 }
