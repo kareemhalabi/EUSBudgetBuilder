@@ -1,8 +1,5 @@
 package ca.mcgilleus.budgetbuilder.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -10,9 +7,12 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Based off of code by Leonid Vvsochvn
- * {@link http://jxls.cvs.sourceforge.net/jxls/jxls/src/java/org/jxls/util/Util.java?revision=1.8&view=markup}
+ * @see <a href="http://jxls.cvs.sourceforge.net/jxls/jxls/src/java/org/jxls/util/Util.java?revision=1.8&view=markup"/>
  * @author Kareem Halabi
  */
 
@@ -104,7 +104,12 @@ public final class Cloner {
                 destCell.setCellErrorValue(srcCell.getErrorCellValue());
                 break;
             case XSSFCell.CELL_TYPE_FORMULA:
-            	destCell.setCellFormula(srcCell.getCellFormula());
+            	//Fix for cells containing external references
+            	if(srcCell.getCellFormula().contains("!") &&
+						!srcCell.getCellFormula().contains("#REF!"))
+            		destCell.setCellValue(srcCell.getNumericCellValue());
+            	else
+            		destCell.setCellFormula(srcCell.getCellFormula());
                 break;
             default:
                 break;
