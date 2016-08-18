@@ -49,8 +49,7 @@ public class ValidationController extends AnchorPane{
 		validationProgressBar.progressProperty().bind(validationTask.progressProperty());
 
 		cancelBackBtn.setOnAction(event -> {
-			validationTask.cancel(true);
-			validationConsole.setText("Cancelled\n");
+			validationTask.cancel(false);
 			cancelOrFail();
 		});
 
@@ -66,7 +65,7 @@ public class ValidationController extends AnchorPane{
 			else cancelOrFail();
 		});
 
-		new Thread(validationTask).start();
+		new Thread(validationTask, "Validation Thread").start();
 	}
 
 	private void showFileSelect() {

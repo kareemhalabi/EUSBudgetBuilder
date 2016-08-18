@@ -43,13 +43,13 @@ public class PortfolioCreator {
 		currentColor = Styles.popTabColor();
 
 		for (File committeeFile : getCommitteeFiles(portfolioDirectory)) {
-			if(buildTask.isCancelled()) {
-				return;
-			}
 			try {
 				CommitteeCreator.createCommitteeBudget(currentColor, currentPortfolio, committeeFile);
 			} catch (Exception e) {
 				buildTask.updateBuildMessage(e.toString());
+			}
+			if(buildTask.isCancelled()) {
+				return;
 			}
 		}
 
@@ -122,7 +122,7 @@ public class PortfolioCreator {
 			committeeExp.setCellStyle(Styles.CURRENCY_CELL_STYLE);
 
 			XSSFCell committeeAmt = committeeRow.createCell(committeeRow.getLastCellNum(), Cell.CELL_TYPE_FORMULA);
-			committeeAmt.setCellFormula(committee.getRevRef() + "-" + committee.getExpRef());
+			committeeAmt.setCellFormula(committee.getRevRef() + "+" + committee.getExpRef());
 			committeeAmt.setCellStyle(Styles.CURRENCY_CELL_STYLE);
 		}
 

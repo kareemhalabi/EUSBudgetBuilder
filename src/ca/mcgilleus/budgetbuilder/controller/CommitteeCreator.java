@@ -24,43 +24,43 @@ import static ca.mcgilleus.budgetbuilder.controller.BudgetBuilder.*;
 
 public class CommitteeCreator {
 
-	public static void createCommitteeBudget(IndexedColors color, Portfolio p, File committeeFile)
-			throws IOException, InvalidFormatException {
+	public static void createCommitteeBudget(IndexedColors color, Portfolio p, File committeeFile) {
 
-		XSSFWorkbook committeeWB = new XSSFWorkbook(committeeFile);
-		XSSFSheet committeeSheet = committeeWB.getSheetAt(0);
+		try (XSSFWorkbook committeeWB = new XSSFWorkbook(committeeFile)) {
+			XSSFSheet committeeSheet = committeeWB.getSheetAt(0);
 
-		Name name = committeeWB.getName("NAME");
-		CellReference nameRef = new CellReference(name.getRefersToFormula());
-		XSSFRow nameRow = committeeSheet.getRow(nameRef.getRow());
-		XSSFCell nameCell = nameRow.getCell(nameRef.getCol());
-		String sheetName = nameCell.getStringCellValue();
+			Name name = committeeWB.getName("NAME");
+			CellReference nameRef = new CellReference(name.getRefersToFormula());
+			XSSFRow nameRow = committeeSheet.getRow(nameRef.getRow());
+			XSSFCell nameCell = nameRow.getCell(nameRef.getCol());
+			String sheetName = nameCell.getStringCellValue();
 
-		//TODO throw error instead
-		// Get full name if abbreviated unavailable
-		if (sheetName == null || sheetName.trim().length() == 0) {
-			nameRow = committeeSheet.getRow(nameRef.getRow() - 1);
-			nameCell = nameRow.getCell(nameRef.getCol());
-			sheetName = nameCell.getStringCellValue();
+			//TODO throw error instead
+			// Get full name if abbreviated unavailable
+			if (sheetName == null || sheetName.trim().length() == 0) {
+				nameRow = committeeSheet.getRow(nameRef.getRow() - 1);
+				nameCell = nameRow.getCell(nameRef.getCol());
+				sheetName = nameCell.getStringCellValue();
+			}
+
+			// So that AMT reference has correct sheet name
+			committeeWB.setSheetName(0, sheetName);
+
+			Name revRef = committeeWB.getName("REV");
+			Name expRef = committeeWB.getName("EXP");
+
+			new CommitteeBudget(sheetName, revRef.getRefersToFormula(), expRef.getRefersToFormula(), p);
+
+			XSSFSheet bSheet = BudgetBuilder.getWorkbook().createSheet(sheetName);
+			Cloner.cloneSheet(committeeSheet, bSheet);
+
+			bSheet.setTabColor(color.getIndex());
+
+			buildTask.updateBuildMessage("\t -" + sheetName);
+			buildTask.updateBuildProgress(++currentProgress, totalProgress);
+		} catch (IOException | InvalidFormatException e) {
+			buildTask.updateBuildMessage(e.toString());
 		}
-
-		// So that AMT reference has correct sheet name
-		committeeWB.setSheetName(0, sheetName);
-
-		Name revRef = committeeWB.getName("REV");
-		Name expRef = committeeWB.getName("EXP");
-
-		new CommitteeBudget(sheetName, revRef.getRefersToFormula(), expRef.getRefersToFormula(),  p);
-
-		XSSFSheet bSheet = BudgetBuilder.getWorkbook().createSheet(sheetName);
-		Cloner.cloneSheet(committeeSheet, bSheet);
-
-		bSheet.setTabColor(color.getIndex());
-
-		committeeWB.close();
-
-		buildTask.updateBuildMessage("\t -" + sheetName);
-		buildTask.updateBuildProgress(++currentProgress, totalProgress);
 	}
 
 }

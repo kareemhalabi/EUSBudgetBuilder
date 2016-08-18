@@ -49,7 +49,7 @@ public class BuildController extends AnchorPane{
 		buildProgressBar.progressProperty().bind(buildTask.progressProperty());
 
 		cancelBackBtn.setOnAction(event -> {
-			buildTask.cancel(true);
+			buildTask.cancel(false);
 			cancelOrFail();
 		});
 
@@ -75,7 +75,7 @@ public class BuildController extends AnchorPane{
 			else cancelOrFail();
 		});
 
-		new Thread(buildTask).start();
+		new Thread(buildTask, "Build Thread").start();
 	}
 
 	private void cancelOrFail() {

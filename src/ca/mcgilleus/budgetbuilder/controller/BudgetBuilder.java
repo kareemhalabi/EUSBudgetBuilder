@@ -50,54 +50,54 @@ public class BudgetBuilder {
 				double currentProgress = 0;
 				for (File f : filesToCheck) {
 
-					if(isCancelled()) {
-						updateMessage("Cancelled");
-						return false;
-					}
 
-					try {
-						//Check if file is already open
-						XSSFWorkbook workbook = new XSSFWorkbook(f);
-
-						//Check names
-						if(workbook.getName("REV") == null) {
+					//Check if file is already open
+					try (XSSFWorkbook workbook = new XSSFWorkbook(f)) {//Check names
+						if (workbook.getName("REV") == null) {
 							errors += "- REV cell name missing in \"" + f.getName() + "\"\n";
 						}
-						if(workbook.getName("EXP") == null) {
+						if (workbook.getName("EXP") == null) {
 							errors += "- EXP cell name missing in \"" + f.getName() + "\"\n";
 						}
-						if(workbook.getName("NAME") == null) {
+						if (workbook.getName("NAME") == null) {
 							errors += "- NAME cell name missing in \"" + f.getName() + "\"\n";
 						}
 
-						workbook.close();
 					} catch (Exception e) {
-						if(e.getMessage().contains("(The process cannot access the file because it is being used by another process)"))
+						if (e.getMessage().contains("(The process cannot access the file because it is being used by another process)")) {
 							errors += "- Close file: \"" + f.getName() + "\"\n";
-						else
+						}
+						else {
 							errors += e.toString();
+						}
+					}
+					if (isCancelled()) {
+						updateMessage("Cancelled");
+						return false;
 					}
 					updateProgress(++currentProgress, filesToCheck.size());
 				}
 
-				if(isCancelled()) {
-					updateMessage("Cancelled");
-					return false;
-				}
 
 				//Check if outputFile is open
 				File outputFile = FileSelectController.getOutputFile();
 				if(outputFile.exists()) {
-					try {
-						//Don't understand why this is necessary, prevents a Zip bomb error
-						ZipSecureFile.setMinInflateRatio(0.001);
-						XSSFWorkbook workbook = new XSSFWorkbook(outputFile);
-						workbook.close();
+					//Don't understand why this is necessary, prevents a Zip bomb error
+					ZipSecureFile.setMinInflateRatio(0.001);
+
+					//noinspection EmptyTryBlock
+					try (XSSFWorkbook workbook = new XSSFWorkbook(outputFile)) {
 					} catch (Exception e) {
-						if(e.getMessage().contains("(The process cannot access the file because it is being used by another process)"))
+						if (e.getMessage().contains("(The process cannot access the file because it is being used by another process)")) {
 							errors += "- Close file: \"" + outputFile.getName() + "\"\n";
-						else
+						}
+						else {
 							errors += e.toString();
+						}
+					}
+					if (isCancelled()) {
+						updateMessage("Cancelled");
+						return false;
 					}
 				}
 
@@ -156,11 +156,11 @@ public class BudgetBuilder {
 
 			//Cycle through each portfolio folder
 			for(File portfolioDirectory : portfolioDirectories) {
+				PortfolioCreator.createPortfolio(portfolioDirectory, budget);
 				if(isCancelled()) {
 					updateBuildMessage("Cancelled");
 					return false;
 				}
-				PortfolioCreator.createPortfolio(portfolioDirectory, budget);
 			}
 
 			updateBuildMessage("Compiling EUS Budget Overview");
