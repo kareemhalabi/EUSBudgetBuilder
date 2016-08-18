@@ -28,7 +28,8 @@ public class ValidationController extends AnchorPane{
 	@FXML
 	public TextArea validationConsole;
 
-	private Task validationTask;
+	public static Task validationTask;
+	public static Thread validationThread;
 
 	// Don't want ValidationController object to be re-used, so a new one will be
 	// created each time validation scene is set
@@ -65,7 +66,8 @@ public class ValidationController extends AnchorPane{
 			else cancelOrFail();
 		});
 
-		new Thread(validationTask, "Validation Thread").start();
+		validationThread = new Thread(validationTask, "Validation Thread");
+		validationThread.start();
 	}
 
 	private void showFileSelect() {

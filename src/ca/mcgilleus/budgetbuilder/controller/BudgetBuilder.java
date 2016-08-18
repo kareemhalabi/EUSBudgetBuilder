@@ -23,7 +23,7 @@ import static ca.mcgilleus.budgetbuilder.controller.PortfolioCreator.*;
 
 public class BudgetBuilder {
 
-	static BuildTask buildTask;
+	public static BuildTask buildTask;
 	private static int totalCommitteeFiles;
 	static int totalProgress;
 	static int currentProgress;
@@ -49,7 +49,6 @@ public class BudgetBuilder {
 				//Check portfolios for errors
 				double currentProgress = 0;
 				for (File f : filesToCheck) {
-
 
 					//Check if file is already open
 					try (XSSFWorkbook workbook = new XSSFWorkbook(f)) {//Check names

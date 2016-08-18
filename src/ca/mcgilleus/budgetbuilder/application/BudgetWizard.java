@@ -5,10 +5,16 @@ package ca.mcgilleus.budgetbuilder.application;
 
 import ca.mcgilleus.budgetbuilder.fxml.WelcomeController;
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+
+import static ca.mcgilleus.budgetbuilder.controller.BudgetBuilder.buildTask;
+import static ca.mcgilleus.budgetbuilder.fxml.BuildController.buildThread;
+import static ca.mcgilleus.budgetbuilder.fxml.ValidationController.validationTask;
+import static ca.mcgilleus.budgetbuilder.fxml.ValidationController.validationThread;
 
 public class BudgetWizard extends Application {
 
@@ -25,5 +31,24 @@ public class BudgetWizard extends Application {
 		primaryStage.setScene(WelcomeController.getWelcomeScene());
 		primaryStage.sizeToScene();
 		primaryStage.show();
+	}
+
+	@Override
+	public void stop() {
+		cancelTask(validationTask, validationThread);
+		cancelTask(buildTask, buildThread);
+	}
+
+	private void cancelTask(Task task, Thread thread) {
+		if(task != null && thread != null) {
+			if(task.isRunning()) {
+				task.cancel(false);
+				try {
+					thread.join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }

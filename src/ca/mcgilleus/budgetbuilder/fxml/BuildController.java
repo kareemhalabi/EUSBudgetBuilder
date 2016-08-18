@@ -29,6 +29,7 @@ public class BuildController extends AnchorPane{
 	public TextArea buildConsole;
 
 	private BudgetBuilder.BuildTask buildTask;
+	public static Thread buildThread;
 
 	// Don't want BuildController object to be re-used, so a new one will be
 	// created each time build scene is set
@@ -75,7 +76,8 @@ public class BuildController extends AnchorPane{
 			else cancelOrFail();
 		});
 
-		new Thread(buildTask, "Build Thread").start();
+		buildThread = new Thread(buildTask, "Build Thread");
+		buildThread.start();
 	}
 
 	private void cancelOrFail() {
