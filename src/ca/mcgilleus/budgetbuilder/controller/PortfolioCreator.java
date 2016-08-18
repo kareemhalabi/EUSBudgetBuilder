@@ -8,15 +8,18 @@ package ca.mcgilleus.budgetbuilder.controller;
 import ca.mcgilleus.budgetbuilder.model.CommitteeBudget;
 import ca.mcgilleus.budgetbuilder.model.EUSBudget;
 import ca.mcgilleus.budgetbuilder.model.Portfolio;
+import ca.mcgilleus.budgetbuilder.util.Cloner;
 import ca.mcgilleus.budgetbuilder.util.Styles;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
 
@@ -25,7 +28,6 @@ import static ca.mcgilleus.budgetbuilder.controller.BudgetBuilder.*;
 public class PortfolioCreator {
 
 	private static IndexedColors currentColor;
-	private static Portfolio currentPortfolio;
 
 	/**
 	 * Creates an EUS portfolio from a directory
@@ -34,7 +36,7 @@ public class PortfolioCreator {
 	 */
 	public static void createPortfolio(File portfolioDirectory, EUSBudget budget) {
 
-		currentPortfolio = new Portfolio(portfolioDirectory.getName(), budget);
+		Portfolio currentPortfolio = new Portfolio(portfolioDirectory.getName(), budget);
 
 		buildTask.updateBuildMessage("Compiling portfolio: " + currentPortfolio.getName());
 
@@ -61,6 +63,76 @@ public class PortfolioCreator {
 		buildTask.updateBuildProgress(++currentProgress, totalProgress);
 	}
 
+	public static void createMiscPortfolio(File miscPortfolioFile, EUSBudget budget) {
+
+
+		Portfolio miscPortfolio = new Portfolio(miscPortfolioFile.getName().split(".xlsx")[0], budget);
+		miscPortfolio.setMisc(true);
+
+		buildTask.updateBuildMessage("Compiling misc portfolio: "+ miscPortfolio.getName());
+
+		XSSFSheet destSheet = budget.getWb().createSheet(miscPortfolio.getName());
+		writeHeader(budget, destSheet);
+
+		//Prevents duplicate CellStyles for Portfolio overview and Budget overview
+		if(miscPortfolio.getPortfolioLabelStyle() == null) {
+			miscPortfolio.setPortfolioLabelStyle(Styles.getPortfolioLabelStyle(Styles.popTabColor()));
+		}
+		CellStyle customPortfolioStyle = miscPortfolio.getPortfolioLabelStyle();
+
+
+		try(XSSFWorkbook miscWorkbook = new XSSFWorkbook(miscPortfolioFile)) {
+			XSSFSheet srcSheet = miscWorkbook.getSheetAt(0);
+
+			for(int i = 1; i < srcSheet.getLastRowNum(); i++) {
+				XSSFRow srcRow = srcSheet.getRow(i);
+				XSSFRow destRow = destSheet.createRow(i);
+
+				XSSFCell miscPortfolioLabel = destRow.createCell(0, Cell.CELL_TYPE_STRING);
+				miscPortfolioLabel.setCellValue(miscPortfolio.getName());
+				miscPortfolioLabel.setCellStyle(customPortfolioStyle);
+
+				XSSFCell functionName = destRow.createCell(destRow.getLastCellNum(),Cell.CELL_TYPE_STRING);
+				Cloner.cloneCell(srcRow.getCell(0), functionName, false);
+				functionName.setCellStyle(Styles.COMMITTEE_LABEL_STYLE);
+
+				XSSFCell functionRev = destRow.createCell(destRow.getLastCellNum());
+				Cloner.cloneCell(srcRow.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK),
+						functionRev, false);
+				functionRev.setCellStyle(Styles.CURRENCY_CELL_STYLE);
+
+				XSSFCell functionExp = destRow.createCell(destRow.getLastCellNum());
+				Cloner.cloneCell(srcRow.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK),
+						functionExp, false);
+				functionExp.setCellStyle(Styles.CURRENCY_CELL_STYLE);
+
+				XSSFCell functionAmt = destRow.createCell(destRow.getLastCellNum(), Cell.CELL_TYPE_FORMULA);
+				functionAmt.setCellFormula(functionRev.getReference() + "+" + functionExp.getReference());
+				functionExp.setCellStyle(Styles.CURRENCY_CELL_STYLE);
+
+				new CommitteeBudget(
+						functionName.getStringCellValue(), //Function name
+						"\'" + miscPortfolio.getName() + "\'!" + functionRev.getReference(), //Revenues ref
+						"\'" + miscPortfolio.getName() + "\'!" + functionExp.getReference(), //Expenses ref
+						miscPortfolio
+				);
+			}
+
+			fixColumnWidths(destSheet);
+
+		} catch (Exception e) {
+			buildTask.updateBuildMessage(e.toString());
+		}
+		if(buildTask.isCancelled()) {
+			return;
+		}
+
+		writeTotals(destSheet);
+
+		buildTask.updateBuildMessage("\t Overview done!");
+		buildTask.updateBuildProgress(++currentProgress, totalProgress);
+	}
+
 	public static void writeHeader(EUSBudget budget, XSSFSheet overviewSheet) {
 		XSSFRow header = overviewSheet.createRow(0);
 
@@ -68,7 +140,7 @@ public class PortfolioCreator {
 		portfolio.setCellValue("Portfolio");
 
 		XSSFCell committee = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
-		committee.setCellValue("Committee");
+		committee.setCellValue("Committee/Function");
 
 		XSSFCell rev = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
 		rev.setCellValue(budget.getBudgetYear() + " Revenues");
@@ -126,14 +198,20 @@ public class PortfolioCreator {
 			committeeAmt.setCellStyle(Styles.CURRENCY_CELL_STYLE);
 		}
 
+		fixColumnWidths(overviewSheet);
+	}
+
+	public static void fixColumnWidths(XSSFSheet overviewSheet) {
 		XSSFRow header = overviewSheet.getRow(0);
-		//Fix Column Widths
 		for(int i = 0; i < header.getLastCellNum(); i++) {
 			overviewSheet.autoSizeColumn(i);
-			int adjustedWidth = overviewSheet.getColumnWidth(i) + 256*3;
 
-			if(adjustedWidth > 5000)
-				adjustedWidth = 5000;
+			//Extra space added to autoSizeColumn()
+			int adjustedWidth = overviewSheet.getColumnWidth(i) + (256 * 3);
+
+			//Prevents excessive column size
+			if(adjustedWidth > 5200)
+				adjustedWidth = 5200;
 
 			overviewSheet.setColumnWidth(i, adjustedWidth);
 		}

@@ -20,7 +20,7 @@ public final class Styles {
 		IndexedColors.LIGHT_ORANGE,
 		IndexedColors.YELLOW,
 		IndexedColors.GREEN,
-		IndexedColors.BLUE,
+		IndexedColors.LIGHT_BLUE,
 		IndexedColors.LAVENDER,
 		IndexedColors.GREY_40_PERCENT
 	};

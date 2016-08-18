@@ -22,8 +22,11 @@ public class Portfolio
   private String name;
   private CellStyle portfolioLabelStyle;
 
+  private boolean isMisc;
+
   //Portfolio Associations
   private List<CommitteeBudget> committeeBudgets;
+
   private EUSBudget eUSBudget;
 
   //------------------------
@@ -34,6 +37,7 @@ public class Portfolio
   {
     name = aName;
     committeeBudgets = new ArrayList<CommitteeBudget>();
+    isMisc = false;
     boolean didAddEUSBudget = setEUSBudget(aEUSBudget);
     if (!didAddEUSBudget)
     {
@@ -93,6 +97,14 @@ public class Portfolio
     return eUSBudget;
   }
 
+  public boolean isMisc() {
+    return isMisc;
+  }
+
+  public void setMisc(boolean misc) {
+    isMisc = misc;
+  }
+
   public static int minimumNumberOfCommitteeBudgets()
   {
     return 0;
@@ -134,7 +146,7 @@ public class Portfolio
   }
 
   public boolean addCommitteeBudgetAt(CommitteeBudget aCommitteeBudget, int index)
-  {  
+  {
     boolean wasAdded = false;
     if(addCommitteeBudget(aCommitteeBudget))
     {

@@ -19,12 +19,14 @@ import java.io.IOException;
 import java.util.*;
 
 import static ca.mcgilleus.budgetbuilder.controller.PortfolioCreator.*;
+import static ca.mcgilleus.budgetbuilder.fxml.FileSelectController.getSelectedDirectory;
 
 
 public class BudgetBuilder {
 
 	public static BuildTask buildTask;
 	private static int totalCommitteeFiles;
+	private static int totalMiscPortfolios;
 	static int totalProgress;
 	static int currentProgress;
 	private static EUSBudget budget;
@@ -38,17 +40,41 @@ public class BudgetBuilder {
 			@Override
 			protected Boolean call() throws Exception {
 
-				final List<File> filesToCheck = getFilesToCheck(FileSelectController.getSelectedDirectory());
+				final List<File> miscPortfoliosToCheck = getMiscPortfolioFilesToCheck(getSelectedDirectory());
+				final List<File> committeeFilesToCheck = getCommitteeFilesToCheck(getSelectedDirectory());
 
-				setTotalCommitteeFiles(filesToCheck.size());
+				totalMiscPortfolios = miscPortfoliosToCheck.size();
+				totalCommitteeFiles = committeeFilesToCheck.size();
 
-				//filesToCheck may be null due to Task cancellation or some other error
-				if (filesToCheck == null)
+				//committeeFilesToCheck may be null due to Task cancellation or some other error
+				if (committeeFilesToCheck == null)
 					return false;
 
-				//Check portfolios for errors
+				//																+ 1 for output file
+				double totalProgress = totalMiscPortfolios + totalCommitteeFiles + 1;
 				double currentProgress = 0;
-				for (File f : filesToCheck) {
+
+				//Check if misc portfolios are open
+				for (File f : miscPortfoliosToCheck) {
+					//noinspection EmptyTryBlock
+					try (XSSFWorkbook workbook = new XSSFWorkbook(f)) {
+					} catch (Exception e) {
+						if (e.getMessage().contains("(The process cannot access the file because it is being used by another process)")) {
+							errors += "- Close file: \"" + f.getName() + "\"\n";
+						}
+						else {
+							errors += e.toString();
+						}
+					}
+					if (isCancelled()) {
+						updateMessage("Cancelled");
+						return false;
+					}
+					updateProgress(++currentProgress, totalProgress);
+				}
+
+				//Check portfolios for errors
+				for (File f : committeeFilesToCheck) {
 
 					//Check if file is already open
 					try (XSSFWorkbook workbook = new XSSFWorkbook(f)) {//Check names
@@ -74,9 +100,8 @@ public class BudgetBuilder {
 						updateMessage("Cancelled");
 						return false;
 					}
-					updateProgress(++currentProgress, filesToCheck.size());
+					updateProgress(++currentProgress, totalProgress);
 				}
-
 
 				//Check if outputFile is open
 				File outputFile = FileSelectController.getOutputFile();
@@ -107,7 +132,11 @@ public class BudgetBuilder {
 				return true;
 			}
 
-			private List<File> getFilesToCheck(File rootDirectory) {
+			private List<File> getMiscPortfolioFilesToCheck(File rootDirectory) {
+				return Arrays.asList(getCommitteeFiles(rootDirectory));
+			}
+
+			private List<File> getCommitteeFilesToCheck(File rootDirectory) {
 
 				ArrayList<File> filesToCheck = new ArrayList<>();
 
@@ -147,11 +176,22 @@ public class BudgetBuilder {
 
 			XSSFSheet overviewSheet = budget.getWb().createSheet(budget.getBudgetYear() + " Budget");
 
-			File[] portfolioDirectories = getPortfolioDirectories(FileSelectController.getSelectedDirectory());
+			File[] miscPortfolioFiles = getCommitteeFiles(getSelectedDirectory());
 
-			//Total progress: total committee sheets + each portfolio overview + budget overview
-			totalProgress = totalCommitteeFiles + portfolioDirectories.length + 1;
+			File[] portfolioDirectories = getPortfolioDirectories(getSelectedDirectory());
+
+			//Total progress: total misc portfolios + total committee sheets + each portfolio overview + budget overview
+			totalProgress = totalMiscPortfolios + totalCommitteeFiles + portfolioDirectories.length + 1;
 			currentProgress = 0;
+
+			//Cycle through each misc portfolio
+			for (File miscPorfolio : miscPortfolioFiles) {
+				PortfolioCreator.createMiscPortfolio(miscPorfolio, budget);
+				if(isCancelled()) {
+					updateBuildMessage("Cancelled");
+					return false;
+				}
+			}
 
 			//Cycle through each portfolio folder
 			for(File portfolioDirectory : portfolioDirectories) {
@@ -198,8 +238,8 @@ public class BudgetBuilder {
 	}
 
 	/**
-	 * Creates a new budget based on Fall Semester year
-	 * @return a new budget based on Fall Semester year
+	 * Creates a new budget based on calendar year of Fall Semester
+	 * @return a new budget based on calendar year of Fall Semester
 	 */
 	public static EUSBudget createBudget() {
 		Calendar c = Calendar.getInstance();
@@ -231,9 +271,5 @@ public class BudgetBuilder {
 				return true;
 			return false;
 		});
-	}
-
-	public static void setTotalCommitteeFiles(int totalCommitteeFiles1) {
-		totalCommitteeFiles = totalCommitteeFiles1;
 	}
 }
