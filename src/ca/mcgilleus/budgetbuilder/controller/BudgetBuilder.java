@@ -6,10 +6,17 @@
 package ca.mcgilleus.budgetbuilder.controller;
 
 import ca.mcgilleus.budgetbuilder.fxml.FileSelectController;
+import ca.mcgilleus.budgetbuilder.model.CommitteeBudget;
 import ca.mcgilleus.budgetbuilder.model.EUSBudget;
 import ca.mcgilleus.budgetbuilder.model.Portfolio;
+import ca.mcgilleus.budgetbuilder.util.Cloner;
+import ca.mcgilleus.budgetbuilder.util.Styles;
 import javafx.concurrent.Task;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -19,16 +26,26 @@ import java.io.IOException;
 import java.util.*;
 
 import static ca.mcgilleus.budgetbuilder.controller.PortfolioCreator.*;
+import static ca.mcgilleus.budgetbuilder.fxml.FileSelectController.getPreviousBudgetFile;
 import static ca.mcgilleus.budgetbuilder.fxml.FileSelectController.getSelectedDirectory;
 
 
 public class BudgetBuilder {
+
+	public static final int PORTFOLIO_COL_INDEX = 0;
+	public static final int COMMITTEE_COL_INDEX = 1;
+	public static final int REV_COL_INDEX = 2;
+	public static final int EXP_COL_INDEX = 3;
+	public static final int CURRENT_AMT_COL_INDEX = 4;
+	public static final int PREV_AMT_COL_INDEX = 5;
+	public static final int DIFF_COL_INDEX = 6;
 
 	public static BuildTask buildTask;
 	private static int totalCommitteeFiles;
 	private static int totalMiscPortfolios;
 	static int totalProgress;
 	static int currentProgress;
+
 	private static EUSBudget budget;
 
 	public static Task getValidationTask() {
@@ -52,6 +69,9 @@ public class BudgetBuilder {
 
 				//																+ 1 for output file
 				double totalProgress = totalMiscPortfolios + totalCommitteeFiles + 1;
+				if(getPreviousBudgetFile() != null) {
+					totalProgress++; // + 1 for previous file
+				}
 				double currentProgress = 0;
 
 				//Check if misc portfolios are open
@@ -77,7 +97,9 @@ public class BudgetBuilder {
 				for (File f : committeeFilesToCheck) {
 
 					//Check if file is already open
-					try (XSSFWorkbook workbook = new XSSFWorkbook(f)) {//Check names
+					try (XSSFWorkbook workbook = new XSSFWorkbook(f)) {
+
+						//Check names
 						if (workbook.getName("REV") == null) {
 							errors += "- REV cell name missing in \"" + f.getName() + "\"\n";
 						}
@@ -123,6 +145,24 @@ public class BudgetBuilder {
 						updateMessage("Cancelled");
 						return false;
 					}
+				}
+
+				//Check if Previous Budget is open
+				if(getPreviousBudgetFile() != null) {
+					try (XSSFWorkbook workbook = new XSSFWorkbook(getPreviousBudgetFile())) {
+					} catch (Exception e) {
+						if (e.getMessage().contains("(The process cannot access the file because it is being used by another process)")) {
+							errors += "- Close file: \"" + outputFile.getName() + "\"\n";
+						}
+						else {
+							errors += e.toString();
+						}
+					}
+					if (isCancelled()) {
+						updateMessage("Cancelled");
+						return false;
+					}
+
 				}
 
 				if(errors.trim().length() != 0) {
@@ -174,7 +214,14 @@ public class BudgetBuilder {
 
 			budget = createBudget();
 
-			XSSFSheet overviewSheet = budget.getWb().createSheet(budget.getBudgetYear() + " Budget");
+			if(getPreviousBudgetFile() != null)
+				rebuildPreviousBudget();
+			if(isCancelled()) {
+				updateBuildMessage("Cancelled");
+				return false;
+			}
+
+			XSSFSheet budgetOverview = budget.getWb().createSheet(budget.getBudgetYear() + " Budget");
 
 			File[] miscPortfolioFiles = getCommitteeFiles(getSelectedDirectory());
 
@@ -202,16 +249,7 @@ public class BudgetBuilder {
 				}
 			}
 
-			updateBuildMessage("Compiling EUS Budget Overview");
-			updateProgress(++currentProgress, totalProgress);
-
-			writeHeader(budget, overviewSheet);
-			for(Portfolio p : budget.getPortfolios())
-				createPortfolioOverview(p, overviewSheet);
-
-			writeTotals(overviewSheet);
-
-			overviewSheet.createFreezePane(0,1);
+			createBudgetOverview(budgetOverview);
 
 			FileOutputStream fileOut;
 			try {
@@ -234,7 +272,6 @@ public class BudgetBuilder {
 		public void updateBuildProgress(double workDone, double max) {
 			updateProgress(workDone, max);
 		}
-
 	}
 
 	/**
@@ -271,5 +308,112 @@ public class BudgetBuilder {
 				return true;
 			return false;
 		});
+	}
+
+	private static void rebuildPreviousBudget() {
+
+		buildTask.updateBuildMessage("Rebuilding previous budget");
+
+		EUSBudget previousBudget = createBudget();
+		budget.setPreviousYear(previousBudget);
+
+		try (XSSFWorkbook previousWorkbook = new XSSFWorkbook(getPreviousBudgetFile())) {
+			XSSFSheet previousBudgetSheet = previousWorkbook.getSheetAt(0);
+
+			String previousRowPortfolioLabel = "";
+			Portfolio previousPortfolio = null;
+			//					Ignore total rows
+			for(int i = 1; i <= previousBudgetSheet.getLastRowNum()-2; i++) {
+
+				XSSFRow committeeRow = previousBudgetSheet.getRow(i);
+
+				//Skip a committee if it has no expense or revenue activity
+				if(committeeRow.getCell(2).getNumericCellValue() == 0 &&
+						committeeRow.getCell(3).getNumericCellValue() == 0) {
+					continue;
+				}
+
+				String portfolioLabel = committeeRow.getCell(0).getStringCellValue();
+
+				if(!portfolioLabel.trim().toUpperCase().equals(previousRowPortfolioLabel.trim().toUpperCase())) {
+					previousPortfolio = new Portfolio(portfolioLabel, previousBudget);
+					previousRowPortfolioLabel = portfolioLabel;
+				}
+
+				String committeeLabel = committeeRow.getCell(1).getStringCellValue();
+				double committeeAmt = committeeRow.getCell(4).getNumericCellValue();
+
+				assert previousPortfolio != null;
+				new CommitteeBudget(committeeLabel, "", "", previousPortfolio).setPreviousAmt(committeeAmt);
+
+			}
+		} catch(Exception e) {
+			buildTask.updateBuildMessage(e.toString());
+		}
+	}
+
+	private static void createBudgetOverview(XSSFSheet budgetOverview) {
+		buildTask.updateBuildMessage("Compiling EUS Budget Overview");
+		buildTask.updateBuildProgress(++currentProgress, totalProgress);
+
+		writeHeader(budget, budgetOverview);
+
+		budget.getWb().setMissingCellPolicy(Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+		int destIndex = 1;
+		for(Portfolio p : budget.getPortfolios()) {
+			XSSFSheet portfolioOverview = budget.getWb().getSheet(p.getName());
+			for(int srcIndex = 1; srcIndex <= portfolioOverview.getLastRowNum()-2; srcIndex++) {
+
+				XSSFRow srcRow = portfolioOverview.getRow(srcIndex);
+				XSSFRow destRow = budgetOverview.createRow(destIndex);
+
+				Cloner.cloneCell(srcRow.getCell(PORTFOLIO_COL_INDEX),destRow.createCell(PORTFOLIO_COL_INDEX), true);
+				Cloner.cloneCell(srcRow.getCell(COMMITTEE_COL_INDEX),destRow.createCell(COMMITTEE_COL_INDEX), true);
+
+				XSSFCell revCell = destRow.createCell(REV_COL_INDEX, Cell.CELL_TYPE_FORMULA);
+				XSSFCell expCell = destRow.createCell(EXP_COL_INDEX, Cell.CELL_TYPE_FORMULA);
+				if(p.isMisc()){
+					revCell.setCellFormula(getSheetCellReference(srcRow.getCell(REV_COL_INDEX)));
+					expCell.setCellFormula(getSheetCellReference(srcRow.getCell(EXP_COL_INDEX)));
+				} else {
+					revCell.setCellFormula(srcRow.getCell(REV_COL_INDEX).getCellFormula());
+					expCell.setCellFormula(srcRow.getCell(EXP_COL_INDEX).getCellFormula());
+				}
+				revCell.setCellStyle(Styles.CURRENCY_CELL_STYLE);
+				expCell.setCellStyle(Styles.CURRENCY_CELL_STYLE);
+
+				XSSFCell currentAmt = destRow.createCell(CURRENT_AMT_COL_INDEX, Cell.CELL_TYPE_FORMULA);
+				currentAmt.setCellFormula(revCell.getReference() + "+" + expCell.getReference());
+				currentAmt.setCellStyle(Styles.CURRENCY_CELL_STYLE);
+
+				if(budget.hasPreviousYear()) {
+					XSSFCell previousAmt = destRow.createCell(PREV_AMT_COL_INDEX, Cell.CELL_TYPE_FORMULA);
+					previousAmt.setCellFormula(getSheetCellReference(srcRow.getCell(PREV_AMT_COL_INDEX)));
+					previousAmt.setCellStyle(Styles.CURRENCY_CELL_STYLE);
+
+					XSSFCell difference = destRow.createCell(DIFF_COL_INDEX, Cell.CELL_TYPE_FORMULA);
+					difference.setCellFormula(currentAmt.getReference() + "-" + previousAmt.getReference());
+					difference.setCellStyle(Styles.CURRENCY_CELL_STYLE);
+				}
+				destIndex++;
+			}
+		}
+
+		//Add any inactive portfolios if they exist
+		if(budget.hasPreviousYear()) {
+			for(Portfolio inactivePortfolio : budget.getPreviousYear().getPortfolios()) {
+				PortfolioCreator.writeInactiveCommittees(budgetOverview, inactivePortfolio, inactivePortfolio);
+			}
+		}
+
+		writeTotals(budgetOverview);
+
+		fixColumnWidths(budgetOverview);
+
+		budgetOverview.createFreezePane(0,1);
+	}
+
+	public static String getSheetCellReference(XSSFCell cell) {
+		return "\'" + cell.getSheet().getSheetName() + "\'!" + cell.getReference();
 	}
 }

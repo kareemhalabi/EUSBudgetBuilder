@@ -79,7 +79,6 @@ public final class Cloner {
 
 	public static void cloneCell(XSSFCell srcCell, XSSFCell destCell, boolean copyStyle) {
         if( copyStyle ){
-        	XSSFWorkbook srcWB = srcCell.getSheet().getWorkbook();
         	CellStyle srcStyle = srcCell.getCellStyle();
         	
         	XSSFWorkbook destWB = destCell.getSheet().getWorkbook();
@@ -106,7 +105,9 @@ public final class Cloner {
             case XSSFCell.CELL_TYPE_FORMULA:
             	//Fix for cells containing external references
             	if(srcCell.getCellFormula().contains("!") &&
-						!srcCell.getCellFormula().contains("#REF!"))
+						!srcCell.getCellFormula().contains("#REF!") &&
+						!srcCell.getSheet().getWorkbook().equals(destCell.getSheet().getWorkbook())
+				)
             		destCell.setCellValue(srcCell.getNumericCellValue());
             	else
             		destCell.setCellFormula(srcCell.getCellFormula());

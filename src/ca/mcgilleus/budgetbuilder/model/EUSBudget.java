@@ -137,16 +137,9 @@ public Portfolio getPortfolio(int index)
     return wasAdded;
   }
 
-  public boolean removePortfolio(Portfolio aPortfolio)
+  public void removePortfolio(Portfolio aPortfolio)
   {
-    boolean wasRemoved = false;
-    //Unable to remove aPortfolio, as it must always have a eUSBudget
-    if (!this.equals(aPortfolio.getEUSBudget()))
-    {
       portfolios.remove(aPortfolio);
-      wasRemoved = true;
-    }
-    return wasRemoved;
   }
 
   public boolean addPortfolioAt(Portfolio aPortfolio, int index)
@@ -207,4 +200,28 @@ public Portfolio getPortfolio(int index)
             "  " + "year" + "=" + (getYear() != null ? !getYear().equals(this)  ? getYear().toString().replaceAll("  ","    ") : "this" : "null")
      + outputString;
   }
+
+  /**
+   * Attempts to find a previous CommitteeBudget
+   * @param currentCommittee the current CommitteeBudget
+   * @return the previous CommitteeBudget if found, null if it is not found or no previous year exists
+   */
+  public CommitteeBudget getPreviousCommittee(CommitteeBudget currentCommittee) {
+
+    if(this.hasPreviousYear())
+      for (Portfolio p : previousYear.getPortfolios())
+        if (p.getCommitteeBudgets().contains(currentCommittee))
+          return p.getCommitteeBudget(p.indexOfCommitteeBudget(currentCommittee));
+
+    return null;
+  }
+
+  public Portfolio getPreviousPortfolio(Portfolio currentPortfolio) {
+    if (this.hasPreviousYear())
+      if(previousYear.getPortfolios().contains(currentPortfolio))
+        return previousYear.getPortfolio(previousYear.indexOfPortfolio(currentPortfolio));
+
+    return null;
+  }
+
 }

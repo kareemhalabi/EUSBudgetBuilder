@@ -133,16 +133,9 @@ public class Portfolio
     return wasAdded;
   }
 
-  public boolean removeCommitteeBudget(CommitteeBudget aCommitteeBudget)
+  public void removeCommitteeBudget(CommitteeBudget aCommitteeBudget)
   {
-    boolean wasRemoved = false;
-    //Unable to remove aCommitteeBudget, as it must always have a portfolio
-    if (!this.equals(aCommitteeBudget.getPortfolio()))
-    {
-      committeeBudgets.remove(aCommitteeBudget);
-      wasRemoved = true;
-    }
-    return wasRemoved;
+    committeeBudgets.remove(aCommitteeBudget);
   }
 
   public boolean addCommitteeBudgetAt(CommitteeBudget aCommitteeBudget, int index)
@@ -216,6 +209,22 @@ public class Portfolio
             "name" + ":" + getName()+ "]" + System.getProperties().getProperty("line.separator") +
             "  " + "eUSBudget = "+(getEUSBudget()!=null?Integer.toHexString(System.identityHashCode(getEUSBudget())):"null")
      + outputString;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if(other instanceof Portfolio) {
+      Portfolio otherPortfolio = (Portfolio) other;
+      return this.getName().trim().toUpperCase().equals(
+              otherPortfolio.getName().trim().toUpperCase()
+      );
+    } else if(other instanceof String) {
+      String otherName = (String) other;
+      return this.getName().trim().toUpperCase().equals(
+              otherName.trim().toUpperCase()
+      );
+    }
+    return false;
   }
 
 public CellStyle getPortfolioLabelStyle() {

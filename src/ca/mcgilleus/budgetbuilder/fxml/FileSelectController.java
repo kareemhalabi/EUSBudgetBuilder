@@ -26,16 +26,32 @@ public class FileSelectController extends AnchorPane{
 	@FXML
 	public TextField outputFileTextField;
 	@FXML
+	public TextField previousFileTextField;
+	@FXML
+	public TextField previousNameTextField;
+
+
+	@FXML
 	public Button fileSelectNextBtn;
+
+	private static File selectedDirectory;
+	public static File getSelectedDirectory() {
+		return selectedDirectory;
+	}
 
 	private static File outputFile;
 	public static File getOutputFile() {
 		return outputFile;
 	}
 
-	private static File selectedDirectory;
-	public static File getSelectedDirectory() {
-		return selectedDirectory;
+	private static File previousBudgetFile;
+	public static File getPreviousBudgetFile() {
+		return previousBudgetFile;
+	}
+
+	private static String previousBudgetName;
+	public static String getPreviousBudgetName() {
+		return previousBudgetName;
 	}
 
 	static Scene getFileSelectScene() {
@@ -78,6 +94,26 @@ public class FileSelectController extends AnchorPane{
 		}
 	}
 
+	public void showFileSelectChooser() {
+		FileChooser fileSelectChooser = new FileChooser();
+		fileSelectChooser.setTitle("Select previous budget");
+		fileSelectChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files", "*.xlsx"));
+		previousBudgetFile = fileSelectChooser.showOpenDialog(primaryStage);
+		if(previousBudgetFile != null) {
+			previousFileTextField.setText(previousBudgetFile.getPath());
+			previousNameTextField.setEditable(true);
+		}
+
+	}
+
+	public void clearFile() {
+		previousBudgetFile = null;
+		previousBudgetName = null;
+		previousFileTextField.clear();
+		previousNameTextField.clear();
+		previousNameTextField.setEditable(false);
+	}
+
 	private void checkNext() {
 		if(selectedDirectory == null || outputFile == null)
 			fileSelectNextBtn.setDisable(true);
@@ -87,6 +123,7 @@ public class FileSelectController extends AnchorPane{
 	}
 
 	public void showValidateScene() {
+		previousBudgetName = previousNameTextField.getText();
 		primaryStage.setScene(new Scene(new ValidationController()));
 	}
 

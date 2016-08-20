@@ -17,6 +17,8 @@ public class CommitteeBudget {
 	private String revRef;
 	private String expRef;
 
+	private double previousAmt;
+
 	// CommitteeBudget Associations
 	private Portfolio portfolio;
 
@@ -59,6 +61,13 @@ public class CommitteeBudget {
 		return wasSet;
 	}
 
+	public boolean setPreviousAmt(double aPreviousAmt) {
+		boolean wasSet = false;
+		previousAmt = aPreviousAmt;
+		wasSet = true;
+		return wasSet;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -69,6 +78,10 @@ public class CommitteeBudget {
 
 	public String getExpRef() {
 		return expRef;
+	}
+
+	public double getPreviousAmt() {
+		return previousAmt;
 	}
 
 	public Portfolio getPortfolio() {
@@ -103,5 +116,23 @@ public class CommitteeBudget {
 				+ "expRef" + ":" + getExpRef() + "]" + System.getProperties().getProperty("line.separator") + "  " + "portfolio = "
 				+ (getPortfolio() != null ? Integer.toHexString(System.identityHashCode(getPortfolio())) : "null")
 				+ outputString;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if(other instanceof CommitteeBudget) {
+
+			CommitteeBudget otherCommittee = (CommitteeBudget) other;
+			return this.getName().trim().toUpperCase().equals(
+					otherCommittee.getName().trim().toUpperCase())
+				&& 	this.getPortfolio().equals(otherCommittee.getPortfolio());
+
+		} else if(other instanceof String) {
+			String otherName = (String) other;
+			return this.getName().trim().toUpperCase().equals(
+					otherName.trim().toUpperCase()
+			);
+		}
+		return false;
 	}
 }
