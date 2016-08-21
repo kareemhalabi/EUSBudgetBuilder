@@ -28,6 +28,7 @@ import java.util.*;
 import static ca.mcgilleus.budgetbuilder.controller.PortfolioCreator.*;
 import static ca.mcgilleus.budgetbuilder.fxml.FileSelectController.getPreviousBudgetFile;
 import static ca.mcgilleus.budgetbuilder.fxml.FileSelectController.getSelectedDirectory;
+import static ca.mcgilleus.budgetbuilder.util.Styles.initStyles;
 
 
 public class BudgetBuilder {
@@ -214,6 +215,8 @@ public class BudgetBuilder {
 
 			budget = createBudget();
 
+			initStyles();
+
 			if(getPreviousBudgetFile() != null)
 				rebuildPreviousBudget();
 			if(isCancelled()) {
@@ -384,7 +387,7 @@ public class BudgetBuilder {
 
 				XSSFCell currentAmt = destRow.createCell(CURRENT_AMT_COL_INDEX, Cell.CELL_TYPE_FORMULA);
 				currentAmt.setCellFormula(revCell.getReference() + "+" + expCell.getReference());
-				currentAmt.setCellStyle(Styles.CURRENCY_CELL_STYLE);
+				currentAmt.setCellStyle(Styles.AMT_CURRENCY_CELL_STYLE);
 
 				if(budget.hasPreviousYear()) {
 					XSSFCell previousAmt = destRow.createCell(PREV_AMT_COL_INDEX, Cell.CELL_TYPE_FORMULA);

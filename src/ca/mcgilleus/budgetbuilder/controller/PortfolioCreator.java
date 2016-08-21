@@ -139,7 +139,7 @@ public class PortfolioCreator {
 
 				XSSFCell functionAmt = destRow.createCell(CURRENT_AMT_COL_INDEX, Cell.CELL_TYPE_FORMULA);
 				functionAmt.setCellFormula(functionRev.getReference() + "+" + functionExp.getReference());
-				functionAmt.setCellStyle(Styles.CURRENCY_CELL_STYLE);
+				functionAmt.setCellStyle(Styles.AMT_CURRENCY_CELL_STYLE);
 
 				CommitteeBudget committee = new CommitteeBudget(
 						functionName.getStringCellValue(), //Function name
@@ -207,7 +207,7 @@ public class PortfolioCreator {
 
 			XSSFCell committeeAmt = committeeRow.createCell(CURRENT_AMT_COL_INDEX, Cell.CELL_TYPE_FORMULA);
 			committeeAmt.setCellFormula(committeeRev.getReference() + "+" + committeeExp.getReference());
-			committeeAmt.setCellStyle(Styles.CURRENCY_CELL_STYLE);
+			committeeAmt.setCellStyle(Styles.AMT_CURRENCY_CELL_STYLE);
 
 			if(p.getEUSBudget().hasPreviousYear()) {
 				writePreviousCommittee(committeeRow, committee);
@@ -266,6 +266,8 @@ public class PortfolioCreator {
 			portfolioLabel.setCellValue(currentPortfolio.getName());
 			if(currentPortfolio.getPortfolioLabelStyle() != null)
 				portfolioLabel.setCellStyle(currentPortfolio.getPortfolioLabelStyle());
+			else
+				portfolioLabel.setCellStyle(Styles.PORTFOLIO_LABEL_STYLE);
 
 			XSSFCell committeeLabel = committeeRow.createCell(COMMITTEE_COL_INDEX, Cell.CELL_TYPE_STRING);
 			committeeLabel.setCellValue(inactiveCommittee.getName());
@@ -281,7 +283,7 @@ public class PortfolioCreator {
 
 			XSSFCell currentAmt = committeeRow.createCell(CURRENT_AMT_COL_INDEX, Cell.CELL_TYPE_FORMULA);
 			currentAmt.setCellFormula(committeeRev.getReference() + "+" + committeeExp.getReference());
-			currentAmt.setCellStyle(Styles.CURRENCY_CELL_STYLE);
+			currentAmt.setCellStyle(Styles.AMT_CURRENCY_CELL_STYLE);
 
 			XSSFCell previousAmt = committeeRow.createCell(PREV_AMT_COL_INDEX, Cell.CELL_TYPE_NUMERIC);
 			previousAmt.setCellValue(inactiveCommittee.getPreviousAmt());
