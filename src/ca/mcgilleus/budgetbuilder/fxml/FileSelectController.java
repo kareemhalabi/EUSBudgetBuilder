@@ -29,8 +29,6 @@ public class FileSelectController extends AnchorPane{
 	public TextField previousFileTextField;
 	@FXML
 	public TextField previousNameTextField;
-
-
 	@FXML
 	public Button fileSelectNextBtn;
 
@@ -71,6 +69,9 @@ public class FileSelectController extends AnchorPane{
 			throw new RuntimeException(exception);
 		}
 
+		previousNameTextField.textProperty().addListener((observable, oldValue, newValue) -> checkNext());
+
+		checkNext();
 	}
 
 	public void showDirectoryChooser() {
@@ -103,7 +104,7 @@ public class FileSelectController extends AnchorPane{
 			previousFileTextField.setText(previousBudgetFile.getPath());
 			previousNameTextField.setEditable(true);
 		}
-
+		checkNext();
 	}
 
 	public void clearFile() {
@@ -112,12 +113,14 @@ public class FileSelectController extends AnchorPane{
 		previousFileTextField.clear();
 		previousNameTextField.clear();
 		previousNameTextField.setEditable(false);
+		checkNext();
 	}
 
 	private void checkNext() {
-		if(selectedDirectory == null || outputFile == null)
+		if(selectedDirectory == null || outputFile == null ||
+				(previousBudgetFile != null && previousNameTextField.getText().isEmpty())) {
 			fileSelectNextBtn.setDisable(true);
-		else {
+		} else {
 			fileSelectNextBtn.setDisable(false);
 		}
 	}
