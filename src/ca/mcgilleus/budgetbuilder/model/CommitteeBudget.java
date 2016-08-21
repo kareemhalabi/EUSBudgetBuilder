@@ -118,6 +118,12 @@ public class CommitteeBudget {
 				+ outputString;
 	}
 
+	/**
+	 * Committees are defined as equal if they have the same name and portfolio
+	 * or if a String matches this committee's name
+	 * @param other the object to compare
+	 * @return if other equals this CommitteeBudget
+	 */
 	@Override
 	public boolean equals(Object other) {
 		if(other instanceof CommitteeBudget) {
@@ -125,7 +131,7 @@ public class CommitteeBudget {
 			CommitteeBudget otherCommittee = (CommitteeBudget) other;
 			return this.getName().trim().toUpperCase().equals(
 					otherCommittee.getName().trim().toUpperCase())
-				&& 	this.getPortfolio().equals(otherCommittee.getPortfolio());
+					&& 	this.getPortfolio().equals(otherCommittee.getPortfolio());
 
 		} else if(other instanceof String) {
 			String otherName = (String) other;
