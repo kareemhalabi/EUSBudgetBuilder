@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.layout.AnchorPane?>
-
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="500.0" type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.76-ea" xmlns:fx="http://javafx.com/fxml/1">
-   <Label layoutX="14.0" layoutY="269.0" text="Created by Kareem Halabi " />
-   <Button fx:id="retryBtn" disable="true" layoutX="445.0" layoutY="265.0" mnemonicParsing="false" text="Retry" />
-   <Label layoutX="14.0" layoutY="14.0" text="Validating Files..." />
-   <Button fx:id="cancelBackBtn" layoutX="386.0" layoutY="265.0" mnemonicParsing="false" text="Cancel" textAlignment="RIGHT" />
-   <ProgressBar fx:id="validationProgressBar" layoutX="12.0" layoutY="37.0" prefHeight="25.0" prefWidth="476.0" progress="0.0" />
-   <ScrollPane layoutX="14.0" layoutY="70.0" prefHeight="185.0" prefWidth="476.0">
-      <content>
-         <TextArea fx:id="validationConsole" editable="false" prefHeight="183.0" prefWidth="474.0" wrapText="true" />
-      </content>
-   </ScrollPane>
+	<Label layoutX="14.0" layoutY="14.0" text="Validating Files..." />
+	<ProgressBar fx:id="validationProgressBar" layoutX="12.0" layoutY="37.0" prefHeight="25.0" prefWidth="476.0" progress="0.0" />
+	<ScrollPane layoutX="14.0" layoutY="70.0" prefHeight="185.0" prefWidth="476.0">
+		<TextArea fx:id="validationConsole" editable="false" prefHeight="183.0" prefWidth="474.0" wrapText="true"/>
+	</ScrollPane>
+	<HBox layoutX="14.0" layoutY="261.0" prefHeight="17.0" prefWidth="472.0">
+		<Label prefHeight="28.0" prefWidth="142.0" text="Created by Kareem Halabi "/>
+		<Region prefHeight="200.0" prefWidth="200.0" visible="false" HBox.hgrow="ALWAYS"/>
+		<Button fx:id="cancelBackBtn" mnemonicParsing="false" text="Cancel"/>
+		<Region prefHeight="200.0" prefWidth="5.0" visible="false"/>
+		<Button fx:id="retryBtn" disable="true" mnemonicParsing="false" text="Retry"/>
+	</HBox>
 </fx:root>
