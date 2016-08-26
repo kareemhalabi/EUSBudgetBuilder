@@ -45,7 +45,10 @@ public class PortfolioCreator {
 
 		currentColor = Styles.popTabColor();
 
-		for (File committeeFile : getCommitteeFiles(portfolioDirectory)) {
+		File[] committeeFiles = getCommitteeFiles(portfolioDirectory);
+		//TODO uncomment if CommitteeName is based off of file Name
+//		Arrays.sort(committeeFiles);
+		for (File committeeFile : committeeFiles) {
 			try {
 				CommitteeCreator.createCommitteeBudget(currentColor, currentPortfolio, committeeFile);
 			} catch (Exception e) {

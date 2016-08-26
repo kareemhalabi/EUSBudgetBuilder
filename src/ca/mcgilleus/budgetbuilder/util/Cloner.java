@@ -11,17 +11,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Set of utility methods for cloning sheets, rows and cells even if the source and destination workbooks differ
  * Based off of code by Leonid Vvsochvn
  * @see <a href="http://jxls.cvs.sourceforge.net/jxls/jxls/src/java/org/jxls/util/Util.java?revision=1.8&view=markup"/>
  * @author Kareem Halabi
  */
-
 public final class Cloner {
 	
 	private static List<CellRangeAddress> remainningRegions;
 	
 	public static void cloneSheet(XSSFSheet srcSheet, XSSFSheet destSheet) {
-		remainningRegions = new ArrayList<CellRangeAddress>(srcSheet.getMergedRegions());
+		remainningRegions = new ArrayList<>(srcSheet.getMergedRegions());
         int maxColumnNum = 0;
         for(int i = srcSheet.getFirstRowNum(); i <= srcSheet.getLastRowNum(); i++){
             XSSFRow srcRow = srcSheet.getRow( i );
@@ -53,7 +53,7 @@ public final class Cloner {
 				cloneCell(srcCell,destCell,true);
 				
 				//Merged regions have to be dealt with separately and prevented from being overlapped
-				CellRangeAddress mergedRegion =  getMergedRegion(srcCell, remainningRegions);
+				CellRangeAddress mergedRegion = getMergedRegion(srcCell, remainningRegions);
 				if(mergedRegion != null) {
 					CellRangeAddress newMergedRegion = new CellRangeAddress(
 							mergedRegion.getFirstRow(), mergedRegion.getLastRow(),
@@ -104,13 +104,13 @@ public final class Cloner {
                 break;
             case XSSFCell.CELL_TYPE_FORMULA:
             	//Fix for cells containing external references
-            	if(srcCell.getCellFormula().contains("!") &&
+				if(srcCell.getCellFormula().contains("!") &&
 						!srcCell.getCellFormula().contains("#REF!") &&
 						!srcCell.getSheet().getWorkbook().equals(destCell.getSheet().getWorkbook())
 				)
-            		destCell.setCellValue(srcCell.getNumericCellValue());
-            	else
-            		destCell.setCellFormula(srcCell.getCellFormula());
+					destCell.setCellValue(srcCell.getNumericCellValue());
+				else
+					destCell.setCellFormula(srcCell.getCellFormula());
                 break;
             default:
                 break;

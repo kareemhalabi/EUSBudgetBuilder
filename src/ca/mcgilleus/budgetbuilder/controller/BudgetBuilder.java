@@ -15,6 +15,7 @@ import javafx.concurrent.Task;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -75,10 +76,34 @@ public class BudgetBuilder {
 				}
 				double currentProgress = 0;
 
-				//Check if misc portfolios are open
+				//Check misc portfolios for errors
 				for (File f : miscPortfoliosToCheck) {
-					//noinspection EmptyTryBlock
+
 					try (XSSFWorkbook workbook = new XSSFWorkbook(f)) {
+
+						XSSFSheet miscSheet = workbook.getSheetAt(0);
+
+						//Check for positive revenues and negative expenses
+						for (int i = 1; i <= miscSheet.getLastRowNum(); i++) {
+
+							XSSFRow row = miscSheet.getRow(i);
+
+							XSSFCell rev = row.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+							if(rev.getNumericCellValue() < 0) {
+								CellReference revRef = new CellReference(rev);
+								//							Column Letter ex "A"		Row number ex "2" (Row is 1 based)
+								errors += "- Revenue cell " + revRef.getCellRefParts()[2] + revRef.getCellRefParts()[1] + " in \""
+										 + f.getName() + "\" is not positive\n";
+							}
+
+							XSSFCell exp = row.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+							if(exp.getNumericCellValue() > 0) {
+								CellReference expRef = new CellReference(exp);
+								//							Column Letter ex "A"		Row number ex "2" (Row is 1 based)
+								errors += "- Expense cell " + expRef.getCellRefParts()[2] + expRef.getCellRefParts()[1] + " in \""
+										+ f.getName() + "\" is not negative\n";
+							}
+						}
 					} catch (Exception e) {
 						if (e.getMessage().contains("(The process cannot access the file because it is being used by another process)")) {
 							errors += "- Close file: \"" + f.getName() + "\"\n";
@@ -102,18 +127,41 @@ public class BudgetBuilder {
 
 						//Check names
 						if (workbook.getName("REV") == null) {
-							errors += "- REV cell name missing in \"" + f.getName() + "\"\n";
+							errors += "- REV cell name missing in \"" + f.getParentFile().getName() + "\\" + f.getName() + "\"\n";
+						} else {
+							//Check if Revenues are positive
+							CellReference revRef = new CellReference(workbook.getName("REV").getRefersToFormula());
+							assert revRef.getSheetName() != null;
+							XSSFRow revRow = workbook.getSheet(revRef.getSheetName()).getRow(revRef.getRow());
+							XSSFCell revCell = revRow.getCell(revRef.getCol());
+							if(revCell.getNumericCellValue() < 0) {
+								//							Column Letter ex "A"		Row number ex "2" (Row is 1 based)
+								errors += "- REV cell " + revRef.getCellRefParts()[2] + revRef.getCellRefParts()[1] + " in \""
+										+ f.getParentFile().getName() + "\\" + f.getName() + "\" is not positive\n";
+							}
 						}
 						if (workbook.getName("EXP") == null) {
 							errors += "- EXP cell name missing in \"" + f.getName() + "\"\n";
+						} else {
+							//Check if Expenses are negative
+							CellReference expRef = new CellReference(workbook.getName("EXP").getRefersToFormula());
+							assert expRef.getSheetName() != null;
+							XSSFRow expRow = workbook.getSheet(expRef.getSheetName()).getRow(expRef.getRow());
+							XSSFCell expCell = expRow.getCell(expRef.getCol());
+							if(expCell.getNumericCellValue() > 0) {
+								//							Column Letter ex "A"		Row number ex "2" (Row is 1 based)
+								errors += "- EXP cell " + expRef.getCellRefParts()[2] + expRef.getCellRefParts()[1] + " in \""
+										+ f.getParentFile().getName() + "\\" + f.getName() + "\" is not negative\n";
+							}
 						}
+
 						if (workbook.getName("NAME") == null) {
 							errors += "- NAME cell name missing in \"" + f.getName() + "\"\n";
 						}
 
 					} catch (Exception e) {
 						if (e.getMessage().contains("(The process cannot access the file because it is being used by another process)")) {
-							errors += "- Close file: \"" + f.getName() + "\"\n";
+							errors += "- Close file: \"" + f.getParentFile().getName() + "\\" + f.getName() + "\"\n";
 						}
 						else {
 							errors += e.toString();
@@ -227,8 +275,10 @@ public class BudgetBuilder {
 			XSSFSheet budgetOverview = budget.getWb().createSheet(budget.getBudgetYear() + " Budget");
 
 			File[] miscPortfolioFiles = getCommitteeFiles(getSelectedDirectory());
+			Arrays.sort(miscPortfolioFiles);
 
 			File[] portfolioDirectories = getPortfolioDirectories(getSelectedDirectory());
+			Arrays.sort(portfolioDirectories);
 
 			//Total progress: total misc portfolios + total committee sheets + each portfolio overview + budget overview
 			totalProgress = totalMiscPortfolios + totalCommitteeFiles + portfolioDirectories.length + 1;

@@ -16,15 +16,16 @@
 	<Label layoutX="14.0" layoutY="99.0" text="    -  Only the first sheet of every committee file, misc portfolio and past budget is read" />
 	<Label layoutX="14.0" layoutY="116.0" text="    -  All files must be closed" />
 	<Label layoutX="14.0" layoutY="133.0" text="    -  All files must be saved as xlsx and not hidden" />
-	<Label layoutX="14.0" layoutY="150.0" prefHeight="34.0" prefWidth="472.0" text="    -  Refrain from modifying generated cells in the Budget overview sheet as this may interfere with reading it back the next year" wrapText="true" />
-	<Label layoutX="14.0" layoutY="198.0" text="Backup all relevant files, I am not responsible for any loss caused by this program" >
+	<Label layoutX="14.0" layoutY="150.0" prefHeight="17.0" prefWidth="484.0" text="    -  Cell references to other sheets or files will be ignored. Only their values will copy over" />
+	<Label layoutX="14.0" layoutY="167.0" prefHeight="34.0" prefWidth="472.0" text="    -  Refrain from modifying generated cells in the Budget overview sheet as this may interfere with reading it back the next year" wrapText="true" />
+	<Label layoutX="13.0" layoutY="222.0" text="Backup all relevant files, I am not responsible for any loss caused by this program">
 		<font>
 			<Font name="System Bold" size="12.0" />
 		</font>
 	</Label>
 	<HBox layoutX="14.0" layoutY="261.0" prefHeight="17.0" prefWidth="472.0">
-		<Label prefHeight="28.0" prefWidth="142.0" text="Created by Kareem Halabi "/>
-		<Region prefHeight="200.0" prefWidth="200.0" visible="false" HBox.hgrow="ALWAYS"/>
-		<Button mnemonicParsing="false" onAction="#showFileSelectScene" text="Next"/>
+		<Label prefHeight="28.0" prefWidth="142.0" text="Created by Kareem Halabi " />
+		<Region prefHeight="200.0" prefWidth="200.0" visible="false" HBox.hgrow="ALWAYS" />
+		<Button mnemonicParsing="false" onAction="#showFileSelectScene" text="Next" />
 	</HBox>
 </fx:root>
