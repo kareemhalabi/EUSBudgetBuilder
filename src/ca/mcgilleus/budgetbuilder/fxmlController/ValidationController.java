@@ -1,6 +1,6 @@
-package ca.mcgilleus.budgetbuilder.fxml;
+package ca.mcgilleus.budgetbuilder.fxmlController;
 
-import ca.mcgilleus.budgetbuilder.controller.BudgetBuilder;
+import ca.mcgilleus.budgetbuilder.service.BudgetBuilder;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -34,7 +34,7 @@ public class ValidationController extends AnchorPane{
 	// Don't want ValidationController object to be re-used, so a new one will be
 	// created each time validation scene is set
 	ValidationController() {
-		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("validate.fxml"));
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/validate.fxml"));
 		fxmlLoader.setRoot(this);
 		fxmlLoader.setController(this);
 
@@ -86,5 +86,4 @@ public class ValidationController extends AnchorPane{
 			primaryStage.setScene(new Scene(new ValidationController()));
 		});
 	}
-
 }

@@ -3,9 +3,9 @@
  * @author Kareem Halabi
  */
 
-package ca.mcgilleus.budgetbuilder.controller;
+package ca.mcgilleus.budgetbuilder.service;
 
-import ca.mcgilleus.budgetbuilder.fxml.FileSelectController;
+import ca.mcgilleus.budgetbuilder.fxmlController.FileSelectController;
 import ca.mcgilleus.budgetbuilder.model.CommitteeBudget;
 import ca.mcgilleus.budgetbuilder.model.EUSBudget;
 import ca.mcgilleus.budgetbuilder.model.Portfolio;
@@ -26,9 +26,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
-import static ca.mcgilleus.budgetbuilder.controller.PortfolioCreator.*;
-import static ca.mcgilleus.budgetbuilder.fxml.FileSelectController.getPreviousBudgetFile;
-import static ca.mcgilleus.budgetbuilder.fxml.FileSelectController.getSelectedDirectory;
+import static ca.mcgilleus.budgetbuilder.fxmlController.FileSelectController.getPreviousBudgetFile;
+import static ca.mcgilleus.budgetbuilder.fxmlController.FileSelectController.getSelectedDirectory;
+import static ca.mcgilleus.budgetbuilder.service.PortfolioCreator.*;
 import static ca.mcgilleus.budgetbuilder.util.Styles.initStyles;
 
 
@@ -363,6 +363,7 @@ public class BudgetBuilder {
 		});
 	}
 
+	//TODO add comments here
 	private static void rebuildPreviousBudget() {
 
 		buildTask.updateBuildMessage("Rebuilding previous budget");

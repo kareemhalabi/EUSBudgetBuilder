@@ -3,7 +3,7 @@ package ca.mcgilleus.budgetbuilder.application;
  * Created by Kareem Halabi on 2016-08-07.
  */
 
-import ca.mcgilleus.budgetbuilder.fxml.WelcomeController;
+import ca.mcgilleus.budgetbuilder.fxmlController.WelcomeController;
 import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.scene.image.Image;
@@ -11,10 +11,10 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-import static ca.mcgilleus.budgetbuilder.controller.BudgetBuilder.buildTask;
-import static ca.mcgilleus.budgetbuilder.fxml.BuildController.buildThread;
-import static ca.mcgilleus.budgetbuilder.fxml.ValidationController.validationTask;
-import static ca.mcgilleus.budgetbuilder.fxml.ValidationController.validationThread;
+import static ca.mcgilleus.budgetbuilder.fxmlController.BuildController.buildThread;
+import static ca.mcgilleus.budgetbuilder.fxmlController.ValidationController.validationTask;
+import static ca.mcgilleus.budgetbuilder.fxmlController.ValidationController.validationThread;
+import static ca.mcgilleus.budgetbuilder.service.BudgetBuilder.buildTask;
 
 public class BudgetWizard extends Application {
 

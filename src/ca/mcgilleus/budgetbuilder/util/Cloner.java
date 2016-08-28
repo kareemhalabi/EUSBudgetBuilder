@@ -18,10 +18,10 @@ import java.util.List;
  */
 public final class Cloner {
 	
-	private static List<CellRangeAddress> remainningRegions;
+	private static List<CellRangeAddress> remainingRegions;
 	
 	public static void cloneSheet(XSSFSheet srcSheet, XSSFSheet destSheet) {
-		remainningRegions = new ArrayList<>(srcSheet.getMergedRegions());
+		remainingRegions = new ArrayList<>(srcSheet.getMergedRegions());
         int maxColumnNum = 0;
         for(int i = srcSheet.getFirstRowNum(); i <= srcSheet.getLastRowNum(); i++){
             XSSFRow srcRow = srcSheet.getRow( i );
@@ -53,12 +53,8 @@ public final class Cloner {
 				cloneCell(srcCell,destCell,true);
 				
 				//Merged regions have to be dealt with separately and prevented from being overlapped
-				CellRangeAddress mergedRegion = getMergedRegion(srcCell, remainningRegions);
+				CellRangeAddress mergedRegion = getMergedRegion(srcCell, remainingRegions);
 				if(mergedRegion != null) {
-					CellRangeAddress newMergedRegion = new CellRangeAddress(
-							mergedRegion.getFirstRow(), mergedRegion.getLastRow(),
-							mergedRegion.getFirstColumn(), mergedRegion.getLastColumn());
-					
 					destRow.getSheet().addMergedRegion(mergedRegion);
 				}
 			}

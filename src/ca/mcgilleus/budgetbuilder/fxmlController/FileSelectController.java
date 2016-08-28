@@ -1,4 +1,4 @@
-package ca.mcgilleus.budgetbuilder.fxml;
+package ca.mcgilleus.budgetbuilder.fxmlController;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -59,7 +59,7 @@ public class FileSelectController extends AnchorPane{
 	}
 
 	private FileSelectController() {
-		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("file_select.fxml"));
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/file_select.fxml"));
 		fxmlLoader.setRoot(this);
 		fxmlLoader.setController(this);
 

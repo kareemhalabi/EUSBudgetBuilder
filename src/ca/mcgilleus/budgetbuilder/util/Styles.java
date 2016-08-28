@@ -1,6 +1,6 @@
 package ca.mcgilleus.budgetbuilder.util;
 
-import ca.mcgilleus.budgetbuilder.controller.BudgetBuilder;
+import ca.mcgilleus.budgetbuilder.service.BudgetBuilder;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;

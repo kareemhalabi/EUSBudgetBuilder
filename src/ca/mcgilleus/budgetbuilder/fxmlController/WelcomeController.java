@@ -1,4 +1,4 @@
-package ca.mcgilleus.budgetbuilder.fxml;
+package ca.mcgilleus.budgetbuilder.fxmlController;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -22,7 +22,7 @@ public class WelcomeController extends AnchorPane{
 	}
 
 	private WelcomeController() {
-		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("welcome.fxml"));
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/welcome.fxml"));
 		fxmlLoader.setRoot(this);
 		fxmlLoader.setController(this);
 
