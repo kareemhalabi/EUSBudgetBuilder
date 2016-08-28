@@ -8,6 +8,7 @@ package ca.mcgilleus.budgetbuilder.service;
 import ca.mcgilleus.budgetbuilder.model.CommitteeBudget;
 import ca.mcgilleus.budgetbuilder.model.EUSBudget;
 import ca.mcgilleus.budgetbuilder.model.Portfolio;
+import ca.mcgilleus.budgetbuilder.task.ValidationTask;
 import ca.mcgilleus.budgetbuilder.util.Cloner;
 import ca.mcgilleus.budgetbuilder.util.Styles;
 import org.apache.poi.ss.usermodel.Cell;
@@ -23,7 +24,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
 
-import static ca.mcgilleus.budgetbuilder.fxmlController.FileSelectController.getPreviousBudgetName;
+import static ca.mcgilleus.budgetbuilder.fxmlController.FileSelectController.previousBudgetName;
 import static ca.mcgilleus.budgetbuilder.service.BudgetBuilder.*;
 
 public class PortfolioCreator {
@@ -35,7 +36,7 @@ public class PortfolioCreator {
 	 * @param portfolioDirectory The root directory of the portfolio
 	 * @param budget Budget to add portfolio to  
 	 */
-	public static void createPortfolio(File portfolioDirectory, EUSBudget budget) {
+	public static void createPortfolio(File portfolioDirectory) {
 
 		Portfolio currentPortfolio = new Portfolio(portfolioDirectory.getName(), budget);
 
@@ -45,7 +46,7 @@ public class PortfolioCreator {
 
 		currentColor = Styles.popTabColor();
 
-		File[] committeeFiles = getCommitteeFiles(portfolioDirectory);
+		File[] committeeFiles = ValidationTask.getCommitteeFiles(portfolioDirectory);
 		//TODO uncomment if CommitteeName is based off of file Name
 //		Arrays.sort(committeeFiles);
 		for (File committeeFile : committeeFiles) {
@@ -86,7 +87,7 @@ public class PortfolioCreator {
 
 		if(budget.hasPreviousYear()) {
 			XSSFCell previousTitle = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
-			previousTitle.setCellValue(getPreviousBudgetName());
+			previousTitle.setCellValue(previousBudgetName);
 
 			XSSFCell difference = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
 			difference.setCellValue("Difference");
@@ -99,7 +100,7 @@ public class PortfolioCreator {
 	}
 
 	//TODO MORE COMMENTS
-	public static void createMiscPortfolio(File miscPortfolioFile, EUSBudget budget) {
+	public static void createMiscPortfolio(File miscPortfolioFile) {
 
 		Portfolio miscPortfolio = new Portfolio(miscPortfolioFile.getName().split(".xlsx")[0], budget);
 		miscPortfolio.setMisc(true);
@@ -346,13 +347,4 @@ public class PortfolioCreator {
 			totals.getCell(l).setCellStyle(Styles.TOTAL_CELL_STYLE);
 	}
 
-	static File[] getCommitteeFiles(File portfolioDirectory) {
-		return portfolioDirectory.listFiles(file -> {
-			if (file.isHidden())
-				return false;
-			else if (file.getName().endsWith(".xlsx"))
-				return true;
-			return false;
-		});
-	}
 }

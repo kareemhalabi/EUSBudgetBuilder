@@ -51,7 +51,7 @@ public class CommitteeCreator {
 
 			new CommitteeBudget(sheetName, revRef.getRefersToFormula(), expRef.getRefersToFormula(), p);
 
-			XSSFSheet bSheet = BudgetBuilder.getWorkbook().createSheet(sheetName);
+			XSSFSheet bSheet = BudgetBuilder.budget.getWb().createSheet(sheetName);
 			Cloner.cloneSheet(committeeSheet, bSheet);
 
 			bSheet.setTabColor(color.getIndex());

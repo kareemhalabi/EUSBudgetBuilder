@@ -1,6 +1,6 @@
 package ca.mcgilleus.budgetbuilder.fxmlController;
 
-import ca.mcgilleus.budgetbuilder.service.BudgetBuilder;
+import ca.mcgilleus.budgetbuilder.task.ValidationTask;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -44,7 +44,7 @@ public class ValidationController extends AnchorPane{
 			throw new RuntimeException(exception);
 		}
 
-		validationTask = BudgetBuilder.getValidationTask();
+		validationTask = new ValidationTask();
 
 		validationProgressBar.progressProperty().unbind();
 		validationProgressBar.progressProperty().bind(validationTask.progressProperty());

@@ -1,7 +1,8 @@
 package ca.mcgilleus.budgetbuilder.fxmlController;
 
-import ca.mcgilleus.budgetbuilder.service.BudgetBuilder;
+import ca.mcgilleus.budgetbuilder.task.BuildTask;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -13,6 +14,7 @@ import java.awt.*;
 import java.io.IOException;
 
 import static ca.mcgilleus.budgetbuilder.application.BudgetWizard.primaryStage;
+import static ca.mcgilleus.budgetbuilder.fxmlController.FileSelectController.outputFile;
 
 /*
  * Created by Kareem Halabi on 2016-08-08.
@@ -28,7 +30,7 @@ public class BuildController extends AnchorPane{
 	@FXML
 	public TextArea buildConsole;
 
-	private BudgetBuilder.BuildTask buildTask;
+	private Task buildTask;
 	public static Thread buildThread;
 
 	// Don't want BuildController object to be re-used, so a new one will be
@@ -44,7 +46,7 @@ public class BuildController extends AnchorPane{
 			throw new RuntimeException(exception);
 		}
 
-		buildTask = new BudgetBuilder.BuildTask();
+		buildTask = new BuildTask();
 
 		buildProgressBar.progressProperty().unbind();
 		buildProgressBar.progressProperty().bind(buildTask.progressProperty());
@@ -65,7 +67,7 @@ public class BuildController extends AnchorPane{
 				finishBtn.setOnAction(event1 -> {
 					try {
 						primaryStage.hide();
-						Desktop.getDesktop().open(FileSelectController.getOutputFile());
+						Desktop.getDesktop().open(outputFile);
 						Platform.exit();
 						System.exit(0);
 					} catch (IOException e) {

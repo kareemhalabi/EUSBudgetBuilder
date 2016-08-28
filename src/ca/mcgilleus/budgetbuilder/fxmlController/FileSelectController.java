@@ -32,25 +32,11 @@ public class FileSelectController extends AnchorPane{
 	@FXML
 	public Button fileSelectNextBtn;
 
-	private static File selectedDirectory;
-	public static File getSelectedDirectory() {
-		return selectedDirectory;
-	}
+	public static File selectedDirectory;
+	public static File outputFile;
+	public static File previousBudgetFile;
 
-	private static File outputFile;
-	public static File getOutputFile() {
-		return outputFile;
-	}
-
-	private static File previousBudgetFile;
-	public static File getPreviousBudgetFile() {
-		return previousBudgetFile;
-	}
-
-	private static String previousBudgetName;
-	public static String getPreviousBudgetName() {
-		return previousBudgetName;
-	}
+	public static String previousBudgetName;
 
 	static Scene getFileSelectScene() {
 		if (fileSelectScene == null)

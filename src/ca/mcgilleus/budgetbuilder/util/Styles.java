@@ -1,6 +1,5 @@
 package ca.mcgilleus.budgetbuilder.util;
 
-import ca.mcgilleus.budgetbuilder.service.BudgetBuilder;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -8,6 +7,7 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 
+import static ca.mcgilleus.budgetbuilder.service.BudgetBuilder.budget;
 
 /**
  * Contains all fields and methods relevant to styling cells
@@ -36,8 +36,8 @@ public final class Styles {
 
 	//initialize styles
 	public static void initStyles() {
-		HEADER_STYLE = BudgetBuilder.getWorkbook().createCellStyle();
-		XSSFFont headerFont= BudgetBuilder.getWorkbook().createFont();
+		HEADER_STYLE = budget.getWb().createCellStyle();
+		XSSFFont headerFont= budget.getWb().createFont();
 	    headerFont.setFontHeightInPoints((short)11);
 	    headerFont.setFontName("Arial");
 	    headerFont.setColor(IndexedColors.WHITE.getIndex());
@@ -56,8 +56,8 @@ public final class Styles {
 
 		//----------------------------------------------------------------
 
-		PORTFOLIO_LABEL_STYLE = BudgetBuilder.getWorkbook().createCellStyle();
-		XSSFFont basicFont= BudgetBuilder.getWorkbook().createFont();
+		PORTFOLIO_LABEL_STYLE = budget.getWb().createCellStyle();
+		XSSFFont basicFont= budget.getWb().createFont();
 		basicFont.setFontHeightInPoints((short)10);
 		basicFont.setFontName("Arial");
 		basicFont.setColor(IndexedColors.WHITE.getIndex());
@@ -74,9 +74,9 @@ public final class Styles {
 
 		//----------------------------------------------------------------
 
-		COMMITTEE_LABEL_STYLE = BudgetBuilder.getWorkbook().createCellStyle();
+		COMMITTEE_LABEL_STYLE = budget.getWb().createCellStyle();
 
-		XSSFFont committeeFont = BudgetBuilder.getWorkbook().createFont();
+		XSSFFont committeeFont = budget.getWb().createFont();
 		committeeFont.setFontHeightInPoints((short)10);
 		committeeFont.setFontName("Arial");
 		committeeFont.setColor(IndexedColors.BLACK.getIndex());
@@ -94,7 +94,7 @@ public final class Styles {
 
 		//----------------------------------------------------------------
 
-		CURRENCY_CELL_STYLE = BudgetBuilder.getWorkbook().createCellStyle();
+		CURRENCY_CELL_STYLE = budget.getWb().createCellStyle();
 
 	    CURRENCY_CELL_STYLE.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
 		CURRENCY_CELL_STYLE.setAlignment(CellStyle.ALIGN_RIGHT);
@@ -102,7 +102,7 @@ public final class Styles {
 		CURRENCY_CELL_STYLE.setBorderRight(CellStyle.BORDER_THIN);
 		CURRENCY_CELL_STYLE.setRightBorderColor(IndexedColors.BLACK.getIndex());
 
-		XSSFDataFormat cF = BudgetBuilder.getWorkbook().createDataFormat();
+		XSSFDataFormat cF = budget.getWb().createDataFormat();
 		//Positive values: "$ 1,234,567.89"
 		// Negative values (in red): "-$ 1,234,567.89"
 		// Zero: "$  -  "
@@ -112,7 +112,7 @@ public final class Styles {
 
 		//----------------------------------------------------------------
 
-		AMT_CURRENCY_CELL_STYLE = BudgetBuilder.getWorkbook().createCellStyle();
+		AMT_CURRENCY_CELL_STYLE = budget.getWb().createCellStyle();
 
 		AMT_CURRENCY_CELL_STYLE.cloneStyleFrom(CURRENCY_CELL_STYLE);
 
@@ -123,8 +123,8 @@ public final class Styles {
 
 		//----------------------------------------------------------------
 
-		TOTAL_LABEL_STYLE = BudgetBuilder.getWorkbook().createCellStyle();
-		XSSFFont totalFont= BudgetBuilder.getWorkbook().createFont();
+		TOTAL_LABEL_STYLE = budget.getWb().createCellStyle();
+		XSSFFont totalFont= budget.getWb().createFont();
 	    totalFont.setFontHeightInPoints((short)10);
 	    totalFont.setFontName("Arial");
 	    totalFont.setColor(IndexedColors.BLACK.getIndex());
@@ -138,7 +138,7 @@ public final class Styles {
 
 		//----------------------------------------------------------------
 
-		TOTAL_CELL_STYLE = BudgetBuilder.getWorkbook().createCellStyle();
+		TOTAL_CELL_STYLE = budget.getWb().createCellStyle();
 
 	    TOTAL_CELL_STYLE.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
 		TOTAL_CELL_STYLE.setAlignment(CellStyle.ALIGN_RIGHT);
@@ -154,9 +154,9 @@ public final class Styles {
 	}
 
 	public static XSSFCellStyle getPortfolioLabelStyle(IndexedColors color) {
-		XSSFCellStyle customPortfolioStyle = BudgetBuilder.getWorkbook().createCellStyle();
+		XSSFCellStyle customPortfolioStyle = budget.getWb().createCellStyle();
 		customPortfolioStyle.cloneStyleFrom(Styles.PORTFOLIO_LABEL_STYLE);
-		XSSFFont customPortfolioFont = BudgetBuilder.getWorkbook().createFont();
+		XSSFFont customPortfolioFont = budget.getWb().createFont();
 		customPortfolioFont.setFontHeightInPoints((short)10);
 		customPortfolioFont.setFontName("Arial");
 		customPortfolioFont.setColor(color.getIndex());
