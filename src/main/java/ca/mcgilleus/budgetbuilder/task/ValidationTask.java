@@ -189,6 +189,7 @@ public class ValidationTask extends Task {
 
 		//Check if Previous Budget is open
 		if(previousBudgetFile != null) {
+			//noinspection EmptyTryBlock
 			try (XSSFWorkbook workbook = new XSSFWorkbook(previousBudgetFile)) {
 			} catch (Exception e) {
 				if (e.getMessage().contains("(The process cannot access the file because it is being used by another process)")) {

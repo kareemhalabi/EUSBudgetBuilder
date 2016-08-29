@@ -38,7 +38,8 @@ public final class Cloner {
         }
     }
 	
-	public static void cloneRow (XSSFRow srcRow, XSSFRow destRow) {
+	@SuppressWarnings("WeakerAccess")
+	public static void cloneRow(XSSFRow srcRow, XSSFRow destRow) {
 		
 		destRow.setHeight( srcRow.getHeight() );
 
@@ -61,7 +62,7 @@ public final class Cloner {
 		}
 	}
 
-	public static CellRangeAddress getMergedRegion(XSSFCell srcCell, List<CellRangeAddress> regions) {
+	private static CellRangeAddress getMergedRegion(XSSFCell srcCell, List<CellRangeAddress> regions) {
 
 		for(CellRangeAddress region : regions) {
 			if(region.isInRange(srcCell.getRowIndex(), srcCell.getColumnIndex())) {

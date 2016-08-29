@@ -39,12 +39,20 @@ public class FileSelectController extends AnchorPane{
 
 	public static String previousBudgetName;
 
+	/**
+	 * Public getter for File Select Scene
+	 * @return the File Select Scene instance
+	 */
 	static Scene getFileSelectScene() {
 		if (fileSelectScene == null)
 			fileSelectScene = new Scene(new FileSelectController());
 		return fileSelectScene;
 	}
 
+	/**
+	 * This class and constructor follows a singleton pattern because the text in all TextFields needs to
+	 * persist after switching to another scene and returning
+	 */
 	private FileSelectController() {
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/file_select.fxml"));
 		fxmlLoader.setRoot(this);
@@ -94,6 +102,9 @@ public class FileSelectController extends AnchorPane{
 		checkNext();
 	}
 
+	/**
+	 * Clears the previous budget fields
+	 */
 	public void clearFile() {
 		previousBudgetFile = null;
 		previousBudgetName = null;
@@ -103,6 +114,10 @@ public class FileSelectController extends AnchorPane{
 		checkNext();
 	}
 
+	/**
+	 * Checks if the next button can be enabled. The next button is enabled when there is a selected directory
+	 * and an output file. If a previous budget is selected, it must have a previous name.
+	 */
 	private void checkNext() {
 		if(selectedDirectory == null || outputFile == null ||
 				(previousBudgetFile != null && previousNameTextField.getText().isEmpty())) {

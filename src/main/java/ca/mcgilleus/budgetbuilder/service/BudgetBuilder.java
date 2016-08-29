@@ -1,8 +1,3 @@
-/**
- * © Kareem Halabi 2016
- * @author Kareem Halabi
- */
-
 package ca.mcgilleus.budgetbuilder.service;
 
 import ca.mcgilleus.budgetbuilder.model.CommitteeBudget;
@@ -24,7 +19,9 @@ import java.util.Date;
 import static ca.mcgilleus.budgetbuilder.fxmlController.FileSelectController.previousBudgetFile;
 import static ca.mcgilleus.budgetbuilder.service.PortfolioCreator.*;
 
-
+/**
+ * This class is the main service that performs the budget building.
+ */
 public class BudgetBuilder {
 
 	static final int PORTFOLIO_COL_INDEX = 0;
@@ -58,7 +55,18 @@ public class BudgetBuilder {
 		return new EUSBudget(budgetYear);
 	}
 
-	//TODO add comments here
+	/**
+	 * Reconstructs a model of the previous year's budget from it's excel file.
+	 * <p>
+	 * A new EUSBudget object is created and set as this year's previous. Then cycling through each row starting after
+	 * the header (Row 2) until the last row (2 before the Total Row) the portfolios, committees and budget net cells
+	 * are read. Any committees having 0 expenses or revenues are deemed inactive for two consecutive budgets and are skipped.
+	 * <p>
+	 * On any given row, if the portfolio label does not match the previous row's portfolio label, a new Portfolio is
+	 * created and the Committee on this row is added to the new Portfolio. If the portfolio label does match the previous,
+	 * the Committee is added to the pre-existing Portfolio. (This is why I have the fields previousRowPortfolioLabel and
+	 * previousPortfolio)
+	 */
 	public static void rebuildPreviousBudget() {
 
 		buildTask.updateBuildMessage("Rebuilding previous budget");
@@ -71,26 +79,26 @@ public class BudgetBuilder {
 
 			String previousRowPortfolioLabel = "";
 			Portfolio previousPortfolio = null;
-			//					Ignore total rows
+			//	skip header		Ignore total rows
 			for(int i = 1; i <= previousBudgetSheet.getLastRowNum()-2; i++) {
 
 				XSSFRow committeeRow = previousBudgetSheet.getRow(i);
 
 				//Skip a committee if it has no expense or revenue activity
-				if(committeeRow.getCell(2).getNumericCellValue() == 0 &&
-						committeeRow.getCell(3).getNumericCellValue() == 0) {
+				if(committeeRow.getCell(REV_COL_INDEX).getNumericCellValue() == 0 &&
+						committeeRow.getCell(EXP_COL_INDEX).getNumericCellValue() == 0) {
 					continue;
 				}
 
-				String portfolioLabel = committeeRow.getCell(0).getStringCellValue();
+				String portfolioLabel = committeeRow.getCell(PORTFOLIO_COL_INDEX).getStringCellValue();
 
 				if(!portfolioLabel.trim().toUpperCase().equals(previousRowPortfolioLabel.trim().toUpperCase())) {
 					previousPortfolio = new Portfolio(portfolioLabel, previousBudget);
 					previousRowPortfolioLabel = portfolioLabel;
 				}
 
-				String committeeLabel = committeeRow.getCell(1).getStringCellValue();
-				double committeeAmt = committeeRow.getCell(4).getNumericCellValue();
+				String committeeLabel = committeeRow.getCell(COMMITTEE_COL_INDEX).getStringCellValue();
+				double committeeAmt = committeeRow.getCell(CURRENT_AMT_COL_INDEX).getNumericCellValue();
 
 				assert previousPortfolio != null;
 				new CommitteeBudget(committeeLabel, "", "", previousPortfolio).setPreviousAmt(committeeAmt);
@@ -101,6 +109,21 @@ public class BudgetBuilder {
 		}
 	}
 
+	/**
+	 * Creates the master budget overview sheet.
+	 * <p>
+	 *  After writing the headers, each portfolio overview is cycled through copying the relevant information.
+	 *  Portfolio and Committee labels are Cloned. References to revenues and expenses from Misc Portfolio Overviews
+	 *  are directly copied over whereas for regular Portfolios, the revenue and expense references are copied from
+	 *  the Committees themselves. Budget net cell formulas are written in-place (i.e not a copied reference)
+	 * <p>
+	 *  If a previous budget exists, the previous amount references are copied over and the difference cell formulas
+	 *  are written in-place (i.e not a copied reference). Any inactive portfolios are written last.
+	 * <p>
+	 *  Finally totals are written, columns are auto-sized and a free pane is created for the first row
+	 *
+	 * @param budgetOverview the sheet to write the overview to.
+	 */
 	public static void createBudgetOverview(XSSFSheet budgetOverview) {
 		buildTask.updateBuildMessage("Compiling EUS Budget Overview");
 		buildTask.updateBuildProgress(++currentProgress, totalProgress);
@@ -108,9 +131,12 @@ public class BudgetBuilder {
 		writeHeader(budget, budgetOverview);
 
 		budget.getWb().setMissingCellPolicy(Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+
+		//Keeps track of current row in budgetOverview. Initialized to 1 because header is skipped.
 		int destIndex = 1;
 		for(Portfolio p : budget.getPortfolios()) {
 			XSSFSheet portfolioOverview = budget.getWb().getSheet(p.getName());
+			//	   skip header		Ignore total rows
 			for(int srcIndex = 1; srcIndex <= portfolioOverview.getLastRowNum()-2; srcIndex++) {
 
 				XSSFRow srcRow = portfolioOverview.getRow(srcIndex);
@@ -162,6 +188,11 @@ public class BudgetBuilder {
 		budgetOverview.createFreezePane(0,1);
 	}
 
+	/**
+	 * Generates a sheet-based reference to a cell
+	 * @param cell the cell to reference to
+	 * @return a String representing the sheet-based reference to passed-in cell
+	 */
 	static String getSheetCellReference(XSSFCell cell) {
 		return "\'" + cell.getSheet().getSheetName() + "\'!" + cell.getReference();
 	}

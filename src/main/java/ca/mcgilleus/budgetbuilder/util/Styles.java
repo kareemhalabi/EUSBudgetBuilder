@@ -24,7 +24,7 @@ public final class Styles {
 	public static XSSFCellStyle TOTAL_CELL_STYLE;
 
 	private static int currentColor = 0;
-	private static IndexedColors[] colors = {
+	private static final IndexedColors[] colors = {
 		IndexedColors.MAROON,
 		IndexedColors.LIGHT_ORANGE,
 		IndexedColors.YELLOW,

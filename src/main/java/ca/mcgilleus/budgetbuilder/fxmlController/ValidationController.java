@@ -14,8 +14,10 @@ import java.io.IOException;
 
 import static ca.mcgilleus.budgetbuilder.application.BudgetWizard.primaryStage;
 
-/*
- * Created by Kareem Halabi on 2016-08-08.
+/**
+ * This class controls the Validation Scene
+ *
+ * @author Kareem Halabi
  */
 public class ValidationController extends AnchorPane{
 
@@ -31,8 +33,21 @@ public class ValidationController extends AnchorPane{
 	public static Task validationTask;
 	public static Thread validationThread;
 
-	// Don't want ValidationController object to be re-used, so a new one will be
-	// created each time validation scene is set
+	/**
+	 * Creates controller instance for validate.fxml
+	 * When a new ValidationController is created, a new ValidationTask is also created. The validation task's progress
+	 * property is bound to the progress bar and a changeListener for the message property updates
+	 * the validationConsole textArea. ValidationThread is set statically so that it can be accessed in BudgetWizard
+	 * in the case the application closes during this step.
+	 * <p>
+	 * Unlike WelcomeController and FileSelectController, ValidationController is not singleton because if the user
+	 * cancels the task or if it fails, a new ValidationController and ValidationTask should be re-created when the user
+	 * retries this step
+	 *
+	 * @see ca.mcgilleus.budgetbuilder.application.BudgetWizard
+	 * @see WelcomeController
+	 * @see FileSelectController
+	 */
 	ValidationController() {
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/validate.fxml"));
 		fxmlLoader.setRoot(this);
@@ -54,11 +69,11 @@ public class ValidationController extends AnchorPane{
 			cancelOrFail();
 		});
 
-		validationTask.messageProperty().addListener((observable, oldValue, newValue) -> {
-			validationConsole.appendText(newValue + "\n");
-		});
+		validationTask.messageProperty().addListener((observable, oldValue, newValue) ->
+			validationConsole.appendText(newValue + "\n")
+		);
 
-		//Task setOnFail is not working, so fail status is checked here
+		//Set on fail not working so returned boolean value determines if task succeeded
 		validationTask.setOnSucceeded(event -> {
 			if ((boolean)validationTask.getValue()) {
 				primaryStage.setScene(new Scene(new BuildController()));
@@ -74,6 +89,11 @@ public class ValidationController extends AnchorPane{
 		primaryStage.setScene(FileSelectController.getFileSelectScene());
 	}
 
+	/**
+	 * Defines the behaviour when the ValidationTask fails or is cancelled.
+	 * Progress bar is reset to 0 and Cancel button switches to a back button to return to File Select
+	 * Retry-button re-generates a new ValidationController to restart this step
+	 */
 	private void cancelOrFail() {
 		validationProgressBar.progressProperty().unbind();
 		validationProgressBar.setProgress(0);
@@ -82,8 +102,8 @@ public class ValidationController extends AnchorPane{
 		cancelBackBtn.setOnAction(event1 -> showFileSelect());
 
 		retryBtn.setDisable(false);
-		retryBtn.setOnAction(event1 -> {
-			primaryStage.setScene(new Scene(new ValidationController()));
-		});
+		retryBtn.setOnAction(event1 ->
+			primaryStage.setScene(new Scene(new ValidationController()))
+		);
 	}
 }

@@ -8,19 +8,28 @@ import java.io.IOException;
 
 import static ca.mcgilleus.budgetbuilder.application.BudgetWizard.primaryStage;
 
-/*
- * Created by Kareem Halabi on 2016-08-08.
+/**
+ * This class controls the Welcome Scene where all instructions and disclaimers are presented
+ * @author Kareem Halabi
  */
 public class WelcomeController extends AnchorPane{
 
 	private static Scene welcomeScene;
 
+	/**
+	 * Public getter for Welcome Scene
+	 * @return the Welcome Scene instance
+	 */
 	public static Scene getWelcomeScene() {
 		if (welcomeScene == null)
 			welcomeScene = new Scene(new WelcomeController());
 		return welcomeScene;
 	}
 
+	/**
+	 * This class and constructor follows a singleton pattern because the welcome scene does not need to
+	 * be recreated after switching to another scene and returning
+	 */
 	private WelcomeController() {
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/welcome.fxml"));
 		fxmlLoader.setRoot(this);

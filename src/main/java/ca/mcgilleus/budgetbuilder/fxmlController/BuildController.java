@@ -71,9 +71,9 @@ public class BuildController extends AnchorPane{
 			cancelOrFail();
 		});
 
-		buildTask.messageProperty().addListener((observable, oldValue, newValue) -> {
-			buildConsole.appendText(newValue +"\n");
-		});
+		buildTask.messageProperty().addListener((observable, oldValue, newValue) ->
+			buildConsole.appendText(newValue +"\n")
+		);
 
 		//Set on fail not working so returned boolean value determines if task succeeded
 		buildTask.setOnSucceeded(event -> {
@@ -99,7 +99,8 @@ public class BuildController extends AnchorPane{
 	}
 
 	/**
-	 * Defines the behaviour when the Build task fails or is cancelled.
+	 * Defines the behaviour when the BuildTask fails or is cancelled.
+	 * Progress bar is reset to 0 and Cancel button switches to a back button to return to File Select
 	 */
 	private void cancelOrFail() {
 		buildProgressBar.progressProperty().unbind();
