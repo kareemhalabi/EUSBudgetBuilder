@@ -6,6 +6,7 @@ package ca.mcgilleus.budgetbuilder.model;
 
 // line 13 "model.ump"
 // line 37 "model.ump"
+@SuppressWarnings("ALL")
 public class CommitteeBudget {
 
 	// ------------------------

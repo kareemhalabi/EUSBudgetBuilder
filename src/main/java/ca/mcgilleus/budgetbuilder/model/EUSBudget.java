@@ -10,6 +10,7 @@ import java.util.*;
 // line 3 "../../../../Model.ump"
 // line 18 "../../../../Model.ump"
 // line 23 "../../../../Model.ump"
+@SuppressWarnings("ALL")
 public class EUSBudget
 {
 

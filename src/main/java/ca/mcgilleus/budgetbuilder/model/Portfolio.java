@@ -11,6 +11,7 @@ import java.util.List;
 
 // line 9 "../../../../Model.ump"
 // line 30 "../../../../Model.ump"
+@SuppressWarnings("ALL")
 public class Portfolio
 {
 
