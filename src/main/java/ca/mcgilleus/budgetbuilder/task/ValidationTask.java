@@ -108,7 +108,8 @@ public class ValidationTask extends Task {
 
 				//Check REV Name
 				if (workbook.getName("REV") == null) {
-					errors += "- REV cell name missing in \"" + committeeFile.getParentFile().getName() + "\\" + committeeFile.getName() + "\"\n";
+					errors += "- REV cell name missing in \"" + committeeFile.getParentFile().getName() + "\\" +
+							committeeFile.getName() + "\"\n";
 				}
 				else {
 					//Check if Revenues are positive
@@ -125,7 +126,8 @@ public class ValidationTask extends Task {
 
 				//Check EXP Name
 				if (workbook.getName("EXP") == null) {
-					errors += "- EXP cell name missing in \"" + committeeFile.getName() + "\"\n";
+					errors += "- EXP cell name missing in \"" + committeeFile.getParentFile().getName() + "\\" +
+							committeeFile.getName() + "\"\n";
 				}
 				else {
 					//Check if Expenses are negative
@@ -142,7 +144,8 @@ public class ValidationTask extends Task {
 
 				//Check NAME name
 				if (workbook.getName("NAME") == null) {
-					errors += "- NAME cell name missing in \"" + committeeFile.getName() + "\"\n";
+					errors += "- NAME cell name missing in \"" + committeeFile.getParentFile().getName() + "\\"
+							+ committeeFile.getName() + "\"\n";
 				}
 
 			} catch (Exception e) {

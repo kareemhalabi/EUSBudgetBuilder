@@ -8,6 +8,8 @@ import ca.mcgilleus.budgetbuilder.util.Cloner;
 import ca.mcgilleus.budgetbuilder.util.Styles;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.util.CellAddress;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -17,7 +19,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static ca.mcgilleus.budgetbuilder.fxmlController.FileSelectController.previousBudgetFile;
-import static ca.mcgilleus.budgetbuilder.service.PortfolioCreator.*;
+import static ca.mcgilleus.budgetbuilder.fxmlController.FileSelectController.previousBudgetName;
 
 /**
  * This class is the main service that performs the budget building.
@@ -128,7 +130,7 @@ public class BudgetBuilder {
 		buildTask.updateBuildMessage("Compiling EUS Budget Overview");
 		buildTask.updateBuildProgress(++currentProgress, totalProgress);
 
-		writeHeader(budget, budgetOverview);
+		writeHeader(budgetOverview);
 
 		budget.getWb().setMissingCellPolicy(Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
 
@@ -195,5 +197,96 @@ public class BudgetBuilder {
 	 */
 	static String getSheetCellReference(XSSFCell cell) {
 		return "\'" + cell.getSheet().getSheetName() + "\'!" + cell.getReference();
+	}
+
+	/**
+	 * Creates a header for an overviewSheet
+	 * Headings are as follows:
+	 * Portfolio	Committee/Function	   Revenues		Expenses	Current Budget	 Previous Budget	Difference
+	 * 																				  (if exists)       (if exists)
+	 * @param overviewSheet the sheet to write the header to
+	 */
+	static void writeHeader(XSSFSheet overviewSheet) {
+		XSSFRow header = overviewSheet.createRow(0);
+
+		XSSFCell portfolio = header.createCell(0, Cell.CELL_TYPE_STRING);
+		portfolio.setCellValue("Portfolio");
+
+		XSSFCell committee = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
+		committee.setCellValue("Committee/Function");
+
+		XSSFCell rev = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
+		rev.setCellValue(budget.getBudgetYear() + " Revenues");
+
+		XSSFCell exp = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
+		exp.setCellValue(budget.getBudgetYear() + " Expenses");
+
+		XSSFCell budgetTitle = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
+		budgetTitle.setCellValue(budget.getBudgetYear() + " Budget");
+
+		if(budget.hasPreviousYear()) {
+			XSSFCell previousTitle = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
+			previousTitle.setCellValue(previousBudgetName);
+
+			XSSFCell difference = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
+			difference.setCellValue("Difference");
+		}
+
+		//Apply Header styles
+		for(Cell cell : header) {
+			cell.setCellStyle(Styles.HEADER_STYLE);
+		}
+	}
+
+	/**
+	 * Adjusts the width of all columns in a sheet such that cell contents don't overlap into their neighbours.
+	 * The standard autosize method is too tight so some space (arbitrarily set at 256*3) is added. If the autosized
+	 * column width exceeds an arbitrary size of 5200, it is capped at 5200
+	 *
+	 * @param overviewSheet the sheet whose columns will be adjusted
+	 */
+	static void fixColumnWidths(XSSFSheet overviewSheet) {
+		XSSFRow header = overviewSheet.getRow(0);
+		for(int i = 0; i < header.getLastCellNum(); i++) {
+			overviewSheet.autoSizeColumn(i);
+
+			//Extra space added to autoSizeColumn()
+			int adjustedWidth = overviewSheet.getColumnWidth(i) + (256 * 3);
+
+			//Prevents excessive column size
+			if(adjustedWidth > 5200)
+				adjustedWidth = 5200;
+
+			overviewSheet.setColumnWidth(i, adjustedWidth);
+		}
+	}
+
+	/**
+	 * Creates ans styles total cells representing the sum of all numerical cells above it.
+	 * There is a blank row between the last entry and total row.
+	 *
+	 * @param overviewSheet the sheet to write totals to
+	 */
+	static void writeTotals(XSSFSheet overviewSheet) {
+
+		XSSFRow totals = overviewSheet.createRow(overviewSheet.getLastRowNum()+2);
+		XSSFCell totalLabel = totals.createCell(1, Cell.CELL_TYPE_STRING);
+		totalLabel.setCellValue("Totals");
+
+		for(int j = totals.getFirstCellNum() + 1;
+			j < overviewSheet.getRow(0).getLastCellNum(); j++) {
+
+			XSSFCell colTotal = totals.createCell(j, Cell.CELL_TYPE_FORMULA);
+			CellAddress ref = colTotal.getAddress();
+			String sumFormula = "SUM(" + CellReference.convertNumToColString(ref.getColumn()) + "2:" +
+					CellReference.convertNumToColString(ref.getColumn()) + (ref.getRow()-1) + ")";
+			colTotal.setCellFormula(sumFormula);
+		}
+
+		//Apply Total styles
+		totalLabel.setCellStyle(Styles.TOTAL_LABEL_STYLE);
+
+		for(int l = 2; l < totals.getLastCellNum(); l++)
+			totals.getCell(l).setCellStyle(Styles.TOTAL_CELL_STYLE);
 	}
 }

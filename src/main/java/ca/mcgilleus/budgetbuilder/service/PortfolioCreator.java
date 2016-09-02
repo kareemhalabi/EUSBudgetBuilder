@@ -1,8 +1,3 @@
-/**
- * © Kareem Halabi 2016
- * @author Kareem Halabi
- */
-
 package ca.mcgilleus.budgetbuilder.service;
 
 import ca.mcgilleus.budgetbuilder.model.CommitteeBudget;
@@ -12,29 +7,31 @@ import ca.mcgilleus.budgetbuilder.task.ValidationTask;
 import ca.mcgilleus.budgetbuilder.util.Cloner;
 import ca.mcgilleus.budgetbuilder.util.Styles;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.util.CellAddress;
-import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 
 import java.io.File;
 
-import static ca.mcgilleus.budgetbuilder.fxmlController.FileSelectController.previousBudgetName;
 import static ca.mcgilleus.budgetbuilder.service.BudgetBuilder.*;
 
+/**
+ * Service class for creating Portfolios and Misc Portfolios
+ *
+ * @author Kareem Halabi
+ */
 public class PortfolioCreator {
 
 	private static IndexedColors currentColor;
 
 	/**
-	 * Creates an EUS portfolio from a directory
+	 * Creates a regular Portfolio from a directory
+	 * <p>
+	 * The Portfolio name is determined by the directory's name. Each portfolio is assigned a color for use on it's committee's
+	 * tabs. In createPortfolioOverview() this color is used to create a custom XSSFCellStyle for the Portfolio label
+	 * in overview sheets.
+	 *
 	 * @param portfolioDirectory The root directory of the portfolio
-	 * @param budget Budget to add portfolio to  
 	 */
 	public static void createPortfolio(File portfolioDirectory) {
 
@@ -60,46 +57,22 @@ public class PortfolioCreator {
 			}
 		}
 
-		writeHeader(budget, overviewSheet);
+		writeHeader(overviewSheet);
 		createPortfolioOverview(currentPortfolio, overviewSheet);
 		writeTotals(overviewSheet);
 
 		buildTask.updateBuildProgress(++currentProgress, totalProgress);
 	}
 
-	public static void writeHeader(EUSBudget budget, XSSFSheet overviewSheet) {
-		XSSFRow header = overviewSheet.createRow(0);
-
-		XSSFCell portfolio = header.createCell(0, Cell.CELL_TYPE_STRING);
-		portfolio.setCellValue("Portfolio");
-
-		XSSFCell committee = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
-		committee.setCellValue("Committee/Function");
-
-		XSSFCell rev = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
-		rev.setCellValue(budget.getBudgetYear() + " Revenues");
-
-		XSSFCell exp = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
-		exp.setCellValue(budget.getBudgetYear() + " Expenses");
-
-		XSSFCell budgetTitle = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
-		budgetTitle.setCellValue(budget.getBudgetYear() + " Budget");
-
-		if(budget.hasPreviousYear()) {
-			XSSFCell previousTitle = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
-			previousTitle.setCellValue(previousBudgetName);
-
-			XSSFCell difference = header.createCell(header.getLastCellNum(), Cell.CELL_TYPE_STRING);
-			difference.setCellValue("Difference");
-		}
-
-		//Apply Header styles
-		for(Cell cell : header) {
-			cell.setCellStyle(Styles.HEADER_STYLE);
-		}
-	}
-
-	//TODO MORE COMMENTS
+	/**
+	 * Creates a Misc Portfolio and overview sheet from a top level xlsx file following the Misc Portfolio template
+	 * <p>
+	 * The Misc Portfolio name is determined by the xlsx filename. Misc Portfolios are given a color to create a custom
+	 * XSSFCellStyle for the Portfolio label in overview sheets. Each row in the misc portfolio file is a Committee/Function
+	 * which contains a cell for it's name, a cell for it's revenues and a cell for it's expenses
+	 *
+	 * @param miscPortfolioFile The top level xlsx file representing a Misc Portfolio
+	 */
 	public static void createMiscPortfolio(File miscPortfolioFile) {
 
 		Portfolio miscPortfolio = new Portfolio(miscPortfolioFile.getName().split(".xlsx")[0], budget);
@@ -108,18 +81,19 @@ public class PortfolioCreator {
 		buildTask.updateBuildMessage("Compiling misc portfolio: "+ miscPortfolio.getName());
 
 		XSSFSheet destSheet = budget.getWb().createSheet(miscPortfolio.getName());
-		writeHeader(budget, destSheet);
+		writeHeader(destSheet);
 
 		//Prevents duplicate CellStyles for Portfolio overview and Budget overview
 		if(miscPortfolio.getPortfolioLabelStyle() == null) {
 			miscPortfolio.setPortfolioLabelStyle(Styles.getPortfolioLabelStyle(Styles.popTabColor()));
 		}
-		CellStyle customPortfolioStyle = miscPortfolio.getPortfolioLabelStyle();
+		XSSFCellStyle customPortfolioStyle = miscPortfolio.getPortfolioLabelStyle();
 
 
 		try(XSSFWorkbook miscWorkbook = new XSSFWorkbook(miscPortfolioFile)) {
 			XSSFSheet srcSheet = miscWorkbook.getSheetAt(0);
 
+			//   skip header
 			for(int i = 1; i <= srcSheet.getLastRowNum(); i++) {
 				XSSFRow srcRow = srcSheet.getRow(i);
 				XSSFRow destRow = destSheet.createRow(i);
@@ -174,6 +148,7 @@ public class PortfolioCreator {
 		writeTotals(destSheet);
 		buildTask.updateBuildProgress(++currentProgress, totalProgress);
 	}
+	
 	/**
 	 * Creates and styles overview rows outlining each Portfolio, Committee and the amount they requested.
 	 * The Portfolio and Committee name cells are string values whereas the Committee amounts are
@@ -182,13 +157,13 @@ public class PortfolioCreator {
 	 * @param p The porfirio overview to create
 	 * @param overviewSheet The sheet to write the overview rows
 	 */
-	public static void createPortfolioOverview(Portfolio p, XSSFSheet overviewSheet) {
+	private static void createPortfolioOverview(Portfolio p, XSSFSheet overviewSheet) {
 
 		//Prevents duplicate CellStyles for Portfolio overview and Budget overview
 		if(p.getPortfolioLabelStyle() == null) {
 			p.setPortfolioLabelStyle(Styles.getPortfolioLabelStyle(currentColor));
 		}
-		CellStyle customPortfolioStyle = p.getPortfolioLabelStyle();
+		XSSFCellStyle customPortfolioStyle = p.getPortfolioLabelStyle();
 
 		for(CommitteeBudget committee : p.getCommitteeBudgets()) {
 			//getLastRowNum()+1 because starts on second row
@@ -226,7 +201,15 @@ public class PortfolioCreator {
 		fixColumnWidths(overviewSheet);
 	}
 
-	public static void writePreviousCommittee(XSSFRow currentRow, CommitteeBudget currentCommittee) {
+	/**
+	 * Writes previous amount and difference cells for previous budget. Attempts to find the previous committee from the
+	 * previous budget, if it exists, the previous amount and difference is written to the currentRow. The previous committee is then
+	 * removed from previous budget so that after all previous committees have been matched with current versions, the
+	 * inactive committees are the ones left in the previous budget
+	 * @param currentRow the row to write the previous amt and difference
+	 * @param currentCommittee the committee to match to a previous version
+	 */
+	private static void writePreviousCommittee(XSSFRow currentRow, CommitteeBudget currentCommittee) {
 		EUSBudget budget = currentCommittee.getPortfolio().getEUSBudget();
 
 		XSSFCell currentAmt = currentRow.getCell(CURRENT_AMT_COL_INDEX);
@@ -254,6 +237,13 @@ public class PortfolioCreator {
 		difference.setCellStyle(Styles.CURRENCY_CELL_STYLE);
 	}
 
+	/**
+	 * Writes inactive committee rows for portfolio overview sheets. Attempts to find the previous portfolio and then
+	 * uses overloaded version of this method to write the appropriate cells. The portfolio is then removed
+	 * it if found so that after all previous portfolios have been matched, inactive ones are left.
+	 * @param overviewSheet the overview sheet to write inactive committees to.
+	 * @param currentPortfolio the portfolio to match to a previous verision
+	 */
 	private static void writeInactiveCommittees(XSSFSheet overviewSheet, Portfolio currentPortfolio) {
 		Portfolio previousPortfolio = currentPortfolio.getEUSBudget().getPreviousPortfolio(currentPortfolio);
 		if(previousPortfolio != null) {
@@ -264,6 +254,15 @@ public class PortfolioCreator {
 		}
 	}
 
+	/**
+	 * Writes the rows for inactive committees in a portfolio. If the portfolio is active it's previously set cell style
+	 * is used for labeling, otherwise the generic label is applied. Current revenues and expesnses are set to 0 and
+	 * budget net formula is still written in case workbook is modified mannually after being generated. Previous amounts
+	 * and difference formula are also set
+	 * @param overviewSheet the overview sheet to write inactive committees to
+	 * @param currentPortfolio the current version of the portfolio
+	 * @param previousPortfolio the previous version of the portfolio
+	 */
 	static void writeInactiveCommittees(XSSFSheet overviewSheet, Portfolio currentPortfolio, Portfolio previousPortfolio) {
 		for(CommitteeBudget inactiveCommittee : previousPortfolio.getCommitteeBudgets()) {
 			XSSFRow committeeRow = overviewSheet.createRow(overviewSheet.getLastRowNum()+1);
@@ -300,51 +299,4 @@ public class PortfolioCreator {
 			difference.setCellStyle(Styles.CURRENCY_CELL_STYLE);
 		}
 	}
-
-
-	public static void fixColumnWidths(XSSFSheet overviewSheet) {
-		XSSFRow header = overviewSheet.getRow(0);
-		for(int i = 0; i < header.getLastCellNum(); i++) {
-			overviewSheet.autoSizeColumn(i);
-
-			//Extra space added to autoSizeColumn()
-			int adjustedWidth = overviewSheet.getColumnWidth(i) + (256 * 3);
-
-			//Prevents excessive column size
-			if(adjustedWidth > 5200)
-				adjustedWidth = 5200;
-
-			overviewSheet.setColumnWidth(i, adjustedWidth);
-		}
-	}
-	/**
-	 * Creates total cells representing the sum of all numerical cells above it.
-	 * There is a blank row between the last entry and total row.
-	 * Total cell styling is also done in this method
-	 *
-	 * @param overviewSheet the sheet to write totals to
-	 */
-	public static void writeTotals(XSSFSheet overviewSheet) {
-
-		XSSFRow totals = overviewSheet.createRow(overviewSheet.getLastRowNum()+2);
-		XSSFCell totalLabel = totals.createCell(1, Cell.CELL_TYPE_STRING);
-		totalLabel.setCellValue("Totals");
-
-		for(int j = totals.getFirstCellNum() + 1;
-			j < overviewSheet.getRow(0).getLastCellNum(); j++) {
-
-			XSSFCell colTotal = totals.createCell(j, Cell.CELL_TYPE_FORMULA);
-			CellAddress ref = colTotal.getAddress();
-			String sumFormula = "SUM(" + CellReference.convertNumToColString(ref.getColumn()) + "2:" +
-					CellReference.convertNumToColString(ref.getColumn()) + (ref.getRow()-1) + ")";
-			colTotal.setCellFormula(sumFormula);
-		}
-
-		//Apply Total styles
-		totalLabel.setCellStyle(Styles.TOTAL_LABEL_STYLE);
-
-		for(int l = 2; l < totals.getLastCellNum(); l++)
-			totals.getCell(l).setCellStyle(Styles.TOTAL_CELL_STYLE);
-	}
-
 }
